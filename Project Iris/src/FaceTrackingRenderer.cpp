@@ -135,6 +135,7 @@ RECT FaceTrackingRenderer::GetResizeRect(RECT rectangle, BITMAP bitmap)
 	return resizedRectangle;
 }
 
+/*
 std::map<PXCFaceData::ExpressionsData::FaceExpression, std::wstring> FaceTrackingRenderer::InitExpressionsMap()
 {
 	std::map<PXCFaceData::ExpressionsData::FaceExpression, std::wstring> map;
@@ -156,6 +157,7 @@ std::map<PXCFaceData::ExpressionsData::FaceExpression, std::wstring> FaceTrackin
 	map[PXCFaceData::ExpressionsData::EXPRESSION_PUFF_LEFT] = std::wstring(L"Puff Left Cheek");
 	return map;
 }
+*/
 
 void FaceTrackingRenderer::SetNumberOfLandmarks(int numLandmarks)
 {

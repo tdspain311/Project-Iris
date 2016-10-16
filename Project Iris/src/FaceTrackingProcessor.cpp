@@ -105,12 +105,11 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
 	/* Set Mode & Source */
 
 	PXCCaptureManager* captureManager = senseManager->QueryCaptureManager();
-
+	/*
 	if (!FaceTrackingUtilities::GetPlaybackState(dialogWindow)) {
-
 		captureManager->FilterByDeviceInfo(FaceTrackingUtilities::GetCheckedDeviceInfo(dialogWindow));
-
 	}
+	*/
 
 	pxcStatus status = PXC_STATUS_NO_ERROR;
 
@@ -244,22 +243,22 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
     FaceTrackingAlertHandler alertHandler(dialogWindow);
 
 	// Enables checkbox options
-    if (FaceTrackingUtilities::GetCheckedModule(dialogWindow)) {
+    //if (FaceTrackingUtilities::GetCheckedModule(dialogWindow)) {
 
         //config->detection.isEnabled = FaceTrackingUtilities::IsModuleSelected(dialogWindow, IDC_LOCATION);
         //config->landmarks.isEnabled = FaceTrackingUtilities::IsModuleSelected(dialogWindow, IDC_LANDMARK);
         //config->pose.isEnabled = FaceTrackingUtilities::IsModuleSelected(dialogWindow, IDC_POSE);
 
-		config->detection.isEnabled = true;
-		config->landmarks.isEnabled = true;
-		config->pose.isEnabled = true;
+	config->detection.isEnabled = true;
+	config->landmarks.isEnabled = true;
+	config->pose.isEnabled = true;
 			
-        config->EnableAllAlerts();
-        config->SubscribeAlert(&alertHandler);
+    config->EnableAllAlerts();
+    config->SubscribeAlert(&alertHandler);
 
-        config->ApplyChanges();
+    config->ApplyChanges();
 
-    }
+    //}
 	
 
     FaceTrackingUtilities::SetStatus(dialogWindow, L"Streaming", statusPart);

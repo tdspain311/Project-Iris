@@ -255,15 +255,15 @@ void InitCalibWindows(CalibMode mode) {
 
 	case mode_calib:
 		InitBackWindow(&ghWndEyeBack, RGB(240, 240, 240), L"Background");
-		InitSimpleWindow(&ghWndEyePoint, 35, RGB(255, 0, 0), L"EyePoint1");  // 35-50
+		InitSimpleWindow(&ghWndEyePoint, 35, RGB(0, 0, 255), L"EyePoint1");  // 35-50
 		break;
 
 	case mode_live:
-		InitTransWindow(&ghWndEyePoint, 100, RGB(255, 255, 0), L"EyePoint2");
+		InitTransWindow(&ghWndEyePoint, 100, RGB(0, 255, 0), L"EyePoint2");
 		break;
 
 	case mode_playback:
-		InitTransWindow(&ghWndEyePoint, 100, RGB(0, 255, 0), L"EyePoint3");
+		InitTransWindow(&ghWndEyePoint, 100, RGB(255, 0, 255), L"EyePoint3");
 		break;
 
 	case mode_record:
@@ -306,25 +306,29 @@ void UpdateTracking() {
 
 }
 
+/*
 std::map<int, PXCFaceConfiguration::TrackingModeType> CreateProfileMap() {
 
 	std::map<int, PXCFaceConfiguration::TrackingModeType> map;
 	map[0] = PXCFaceConfiguration::TrackingModeType::FACE_MODE_COLOR_PLUS_DEPTH;
 	map[1] = PXCFaceConfiguration::TrackingModeType::FACE_MODE_COLOR;
+	
 	return map;
-
 }
+*/
 
-std::map<int, PXCFaceConfiguration::TrackingModeType> s_profilesMap = CreateProfileMap();
+//std::map<int, PXCFaceConfiguration::TrackingModeType> s_profilesMap = CreateProfileMap();
 
+/*
 std::map<int, PXCCapture::DeviceInfo> CreateDeviceInfoMap()
 {
 	std::map<int, PXCCapture::DeviceInfo> map;	
 	return map;
 }
+*/
 
-std::map<int, PXCCapture::DeviceInfo> g_deviceInfoMap = CreateDeviceInfoMap();
-
+//std::map<int, PXCCapture::DeviceInfo> g_deviceInfoMap = CreateDeviceInfoMap();
+/*
 pxcCHAR* GetStringFromFaceMode(PXCFaceConfiguration::TrackingModeType mode) {
 
 	switch (mode) {
@@ -342,6 +346,7 @@ pxcCHAR* GetStringFromFaceMode(PXCFaceConfiguration::TrackingModeType mode) {
 
 	return L"";
 }
+*/
 
 void GetPlaybackFile(void) {
 
@@ -502,6 +507,7 @@ void GetRecordFile(void) {
 
 }
 
+/*
 void PopulateDevice(HMENU menu) {
 
 	DeleteMenu(menu, 0, MF_BYPOSITION);
@@ -540,6 +546,8 @@ void PopulateDevice(HMENU menu) {
 	InsertMenu(menu, 0, MF_BYPOSITION | MF_POPUP, (UINT_PTR)menu1, L"Device");
 
 }
+*/
+
 /*
 void PopulateModule(HMENU menu) {
 
@@ -872,11 +880,13 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 	case WM_INITDIALOG:
 
 		//PopulateDevice(menu1);
-
+		/*
 		CheckDlgButton(dialogWindow, IDC_LOCATION, BST_CHECKED);
 		CheckDlgButton(dialogWindow, IDC_SCALE, BST_CHECKED);
 		CheckDlgButton(dialogWindow, IDC_LANDMARK, BST_CHECKED);
 		CheckDlgButton(dialogWindow, IDC_POSE, BST_CHECKED);
+		*/
+
 		//deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
 		/*
 		if (wcsstr(deviceName, L"R200") == NULL && wcsstr(deviceName, L"DS4") == NULL) {
@@ -892,7 +902,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 
 		//PopulateModule(menu1);
 		//PopulateProfile(dialogWindow);
-		SaveLayout(dialogWindow);
+		//SaveLayout(dialogWindow);
 		/*
 		SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)"From Profile");
 		SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)"Right Eye");
@@ -1111,10 +1121,11 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 			processor = new FaceTrackingProcessor(dialogWindow);
 			CreateThread(0, 0, ProcessingThread, dialogWindow, 0, 0);
 			
+			/*
 			Button_Enable(GetDlgItem(dialogWindow, IDC_LOCATION), false);
 			Button_Enable(GetDlgItem(dialogWindow, IDC_LANDMARK), false);
 			Button_Enable(GetDlgItem(dialogWindow, IDC_POSE), false);
-			
+			*/
 			Sleep(0); //TODO: remove
 			return TRUE;
 
@@ -1137,8 +1148,8 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 				
 				Button_Enable(GetDlgItem(dialogWindow, ID_START), true);
 				Button_Enable(GetDlgItem(dialogWindow, ID_STOP), false);
-				Button_Enable(GetDlgItem(dialogWindow, IDC_LOCATION), true);
-				Button_Enable(GetDlgItem(dialogWindow, IDC_LANDMARK), true);
+				//Button_Enable(GetDlgItem(dialogWindow, IDC_LOCATION), true);
+				//Button_Enable(GetDlgItem(dialogWindow, IDC_LANDMARK), true);
 				Button_Enable(GetDlgItem(dialogWindow, ID_LOAD_CALIB), true);
 				Button_Enable(GetDlgItem(dialogWindow, ID_NEW_CALIB), true);
 

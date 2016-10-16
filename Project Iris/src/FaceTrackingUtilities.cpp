@@ -2,7 +2,7 @@
 #include "FaceTrackingUtilities.h"
 #include "resource.h"
 #include <commctrl.h>
-
+/*
 PXCFaceConfiguration::TrackingModeType FaceTrackingUtilities::GetCheckedProfile(HWND dialogWindow)
 {
 	HMENU menu = GetSubMenu(GetMenu(dialogWindow), 2);
@@ -10,6 +10,7 @@ PXCFaceConfiguration::TrackingModeType FaceTrackingUtilities::GetCheckedProfile(
 	int index = GetChecked(menu);
 	return s_profilesMap[index];
 }
+*/
 
 bool FaceTrackingUtilities::GetPlaybackState(HWND DialogWindow)
 {
@@ -20,11 +21,12 @@ bool FaceTrackingUtilities::GetRecordState(HWND hwndDlg)
 {
 	return (GetMenuState(GetMenu(hwndDlg), ID_MODE_RECORD, MF_BYCOMMAND) & MF_CHECKED) != 0;
 }
-
+/*
 bool FaceTrackingUtilities::IsModuleSelected(HWND hwndDlg, const int moduleID)
 {
 	return (Button_GetState(GetDlgItem(hwndDlg, moduleID)) & BST_CHECKED) != 0;
 }
+*/
 
 void FaceTrackingUtilities::SetStatus(HWND dialogWindow, pxcCHAR *line, StatusWindowPart part)
 {
@@ -33,6 +35,7 @@ void FaceTrackingUtilities::SetStatus(HWND dialogWindow, pxcCHAR *line, StatusWi
 	UpdateWindow(dialogWindow);
 }
 
+/*
 pxcCHAR* FaceTrackingUtilities::GetCheckedModule(HWND dialogWindow)
 {
 	HMENU menu = GetSubMenu(GetMenu(dialogWindow), 1);
@@ -41,7 +44,9 @@ pxcCHAR* FaceTrackingUtilities::GetCheckedModule(HWND dialogWindow)
 	GetMenuString(menu, GetChecked(menu), line, sizeof(line) / sizeof(pxcCHAR), MF_BYPOSITION);
 	return line;
 }
+*/
 
+/*
 pxcCHAR* FaceTrackingUtilities::GetCheckedDevice(HWND dialogWindow)
 {
 	HMENU menu = GetSubMenu(GetMenu(dialogWindow), 0);
@@ -49,7 +54,9 @@ pxcCHAR* FaceTrackingUtilities::GetCheckedDevice(HWND dialogWindow)
 	GetMenuString(menu, GetChecked(menu), line, sizeof(line) / sizeof(pxcCHAR), MF_BYPOSITION);
 	return line;
 }
+*/
 
+/*
 int FaceTrackingUtilities::GetChecked(HMENU menu)
 {
 	for (int i = 0; i < GetMenuItemCount(menu); ++i)
@@ -60,8 +67,9 @@ int FaceTrackingUtilities::GetChecked(HMENU menu)
 
 	return 0;
 }
+*/
 
-
+/*
 PXCCapture::DeviceInfo* FaceTrackingUtilities::GetCheckedDeviceInfo(HWND hwndDlg)
 {
 	HMENU menu=GetSubMenu(GetMenu(hwndDlg),0);	// ID_DEVICE
@@ -71,3 +79,4 @@ PXCCapture::DeviceInfo* FaceTrackingUtilities::GetCheckedDeviceInfo(HWND hwndDlg
 	else
 		return &g_deviceInfoMap[pos];
 }
+*/
