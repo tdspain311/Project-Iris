@@ -234,7 +234,6 @@
   <ItemGroup>
     <ClCompile Include="src\FaceTrackingProcessor.cpp" />
     <ClCompile Include="src\FaceTrackingAlertHandler.cpp" />
-    <ClCompile Include="src\FaceTrackingRenderer2D.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\FaceTrackingFrameRateCalculator.cpp" />
     <ClCompile Include="src\FaceTrackingRendererManager.cpp" />
@@ -248,7 +247,6 @@
     <ClInclude Include="include\FaceTrackingProcessor.h" />
     <ClInclude Include="include\FaceTrackingRenderer.h" />
     <ClInclude Include="include\FaceTrackingAlertHandler.h" />
-    <ClInclude Include="include\FaceTrackingRenderer2D.h" />
     <ClInclude Include="include\FaceTrackingFrameRateCalculator.h" />
     <ClInclude Include="include\FaceTrackingUtilities.h" />
     <ClInclude Include="include\FaceTrackingRenderer3D.h" />

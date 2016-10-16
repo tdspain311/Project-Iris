@@ -13,7 +13,7 @@ FaceTrackingRenderer::FaceTrackingRenderer(HWND window) : m_window(window)
 {
 	m_landmarkPoints = NULL;
 	m_senseManager = NULL;
-	m_expressionMap = InitExpressionsMap();
+	//m_expressionMap = InitExpressionsMap();
 }
 
 void FaceTrackingRenderer::SetOutput(PXCFaceData* output)
@@ -98,7 +98,9 @@ void FaceTrackingRenderer::RefreshUserInterface()
 	BITMAP bm;
 	GetObject(m_bitmap, sizeof(BITMAP), &bm);
 
-	bool scale = Button_GetState(GetDlgItem(m_window, IDC_SCALE)) & BST_CHECKED;
+	//bool scale = Button_GetState(GetDlgItem(m_window, IDC_SCALE)) & BST_CHECKED;
+	bool scale = true;
+
 	if (scale)
 	{
 		RECT rc1 = GetResizeRect(rc, bm);

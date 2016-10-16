@@ -13,7 +13,7 @@
 #include "service/pxcsessionservice.h"
 #include "FaceTrackingFrameRateCalculator.h"
 #include "FaceTrackingRendererManager.h"
-#include "FaceTrackingRenderer2D.h"
+//#include "FaceTrackingRenderer2D.h"
 #include "FaceTrackingRenderer3D.h"
 #include "FaceTrackingUtilities.h"
 #include "FaceTrackingProcessor.h"
@@ -540,7 +540,7 @@ void PopulateDevice(HMENU menu) {
 	InsertMenu(menu, 0, MF_BYPOSITION | MF_POPUP, (UINT_PTR)menu1, L"Device");
 
 }
-
+/*
 void PopulateModule(HMENU menu) {
 
 	DeleteMenu(menu, 1, MF_BYPOSITION);
@@ -561,8 +561,11 @@ void PopulateModule(HMENU menu) {
 	InsertMenu(menu, 1, MF_BYPOSITION | MF_POPUP, (UINT_PTR)menu1, L"Module");
 
 }
+*/
 
-void PopulateProfile(HWND dialogWindow) {
+/*
+void PopulateProfile(HWND dialogWindow)
+ {
 
 	HMENU menu = GetMenu(dialogWindow);
 	DeleteMenu(menu, 2, MF_BYPOSITION);
@@ -593,6 +596,7 @@ void PopulateProfile(HWND dialogWindow) {
 	InsertMenu(menu, 2, MF_BYPOSITION | MF_POPUP, (UINT_PTR)menu1, L"Profile");
 
 }
+*/
 
 void SaveLayout(HWND dialogWindow) {
 
@@ -673,6 +677,7 @@ static DWORD WINAPI ProcessingThread(LPVOID arg) {
 
 }
 
+/*
 void DisableUnsupportedAlgos(HWND dialogWindow, bool isDisabled) {
 
 	if(isDisabled) {
@@ -689,6 +694,7 @@ void DisableUnsupportedAlgos(HWND dialogWindow, bool isDisabled) {
 	Button_Enable(GetDlgItem(dialogWindow, IDC_POSE), !isDisabled);
 
 }
+*/
 
 BOOL CALLBACK ResultsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 
@@ -768,7 +774,7 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPar
 			}
 
 			// show dominant eye
-
+			/*
 			switch (dominant_eye) {
 
 			case 0:
@@ -788,7 +794,7 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPar
 				break;
 
 			}
-
+			*/
 			break;
 
         case WM_COMMAND: 
@@ -859,19 +865,20 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 
 	HMENU menu1 = GetMenu(dialogWindow);
 	HMENU menu2;
-	pxcCHAR* deviceName;
+	//pxcCHAR* deviceName;
 
 	switch (message) {
 
 	case WM_INITDIALOG:
 
-		PopulateDevice(menu1);
+		//PopulateDevice(menu1);
 
 		CheckDlgButton(dialogWindow, IDC_LOCATION, BST_CHECKED);
 		CheckDlgButton(dialogWindow, IDC_SCALE, BST_CHECKED);
 		CheckDlgButton(dialogWindow, IDC_LANDMARK, BST_CHECKED);
-		deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
-		
+		CheckDlgButton(dialogWindow, IDC_POSE, BST_CHECKED);
+		//deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
+		/*
 		if (wcsstr(deviceName, L"R200") == NULL && wcsstr(deviceName, L"DS4") == NULL) {
 
 			CheckDlgButton(dialogWindow, IDC_POSE, BST_CHECKED);
@@ -881,22 +888,24 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 			DisableUnsupportedAlgos(dialogWindow, true);
 
 		}
+		*/
 
-		PopulateModule(menu1);
-		PopulateProfile(dialogWindow);
+		//PopulateModule(menu1);
+		//PopulateProfile(dialogWindow);
 		SaveLayout(dialogWindow);
-		
+		/*
 		SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)"From Profile");
 		SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)"Right Eye");
 		SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)"Left Eye");
 		SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_SETCURSEL, 0, (LPARAM)0);
-
+		*/
 		return TRUE; 
 
 	break;
 
 	case WM_COMMAND:
-
+		/*
+		// Device Menu handle
 		menu2 = GetSubMenu(menu1, 0);
 
 		if (LOWORD(wParam) >= ID_DEVICEX && LOWORD(wParam) < ID_DEVICEX + GetMenuItemCount(menu2)) {
@@ -908,7 +917,10 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 			return TRUE;
 
 		}
+		*/
 
+		/*
+		// Module menu handle
 		menu2 = GetSubMenu(menu1, 1);
 
 		if (LOWORD(wParam) >= ID_MODULEX && LOWORD(wParam) < ID_MODULEX + GetMenuItemCount(menu2)) {
@@ -920,7 +932,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 		}
 
 		menu2 = GetSubMenu(menu1, 2);
-
+		// Profile Menu handle
 		if (LOWORD(wParam) >= ID_PROFILEX && LOWORD(wParam) < ID_PROFILEX + GetMenuItemCount(menu2)) {
 
 			CheckMenuRadioItem(menu2, 0, GetMenuItemCount(menu2), LOWORD(wParam) - ID_PROFILEX,MF_BYPOSITION);
@@ -939,7 +951,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 			return TRUE;
 
 		}
-
+		*/
 		switch (LOWORD(wParam)) {
 
 		case IDCANCEL:
@@ -1063,12 +1075,14 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 			Button_Enable(GetDlgItem(dialogWindow, ID_START), false);
 			Button_Enable(GetDlgItem(dialogWindow, ID_STOP), true);
 
-			dominant_eye = SendMessage(GetDlgItem(dialogWindow, IDC_LIST1), LB_GETCURSEL, (WPARAM)0 , (LPARAM)0);
+			//dominant_eye = SendMessage(GetDlgItem(dialogWindow, IDC_LIST1), LB_GETCURSEL, (WPARAM)0 , (LPARAM)0);
 
+			// Greys menu bar
 			for (int i = 0;i < GetMenuItemCount(menu1); ++i)
 				EnableMenuItem(menu1, i, MF_BYPOSITION | MF_GRAYED);
-
+			
 			DrawMenuBar(dialogWindow);
+
 			isStopped = false;
 			isRunning = true;
 
@@ -1093,13 +1107,14 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 			}
 
 			if (processor) delete processor;
+
 			processor = new FaceTrackingProcessor(dialogWindow);
 			CreateThread(0, 0, ProcessingThread, dialogWindow, 0, 0);
-
+			
 			Button_Enable(GetDlgItem(dialogWindow, IDC_LOCATION), false);
 			Button_Enable(GetDlgItem(dialogWindow, IDC_LANDMARK), false);
 			Button_Enable(GetDlgItem(dialogWindow, IDC_POSE), false);
-
+			
 			Sleep(0); //TODO: remove
 			return TRUE;
 
@@ -1114,12 +1129,12 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 				CloseCalibWindows();
 
 			} else {
-
+				// Enables menu bar
 				for (int i = 0; i < GetMenuItemCount(menu1); ++i)
 					EnableMenuItem(menu1, i, MF_BYPOSITION | MF_ENABLED);
-
+				
 				DrawMenuBar(dialogWindow);
-	
+				
 				Button_Enable(GetDlgItem(dialogWindow, ID_START), true);
 				Button_Enable(GetDlgItem(dialogWindow, ID_STOP), false);
 				Button_Enable(GetDlgItem(dialogWindow, IDC_LOCATION), true);
@@ -1127,10 +1142,11 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 				Button_Enable(GetDlgItem(dialogWindow, ID_LOAD_CALIB), true);
 				Button_Enable(GetDlgItem(dialogWindow, ID_NEW_CALIB), true);
 
+				/*
 				deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
 				bool disable = (wcsstr(deviceName, L"R200") != NULL || wcsstr(deviceName, L"DS4") != NULL);
 				DisableUnsupportedAlgos(dialogWindow, disable);			
-
+				*/
 			}
 
 			return TRUE;
@@ -1168,16 +1184,16 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
     case WM_ACTIVATEAPP:
         isActiveApp = wParam != 0;
         break;
-
+	/*
 	case WM_NOTIFY:
-
+		
 		switch (((LPNMHDR)lParam)->code) {
 			
 		case TCN_SELCHANGE:
 			{ 
 				HWND hwndTab = GetDlgItem(dialogWindow, IDC_TAB);
-				int iPage = TabCtrl_GetCurSel(hwndTab);
-				deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
+				//int iPage = TabCtrl_GetCurSel(hwndTab);
+				//deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
 				
 				
 				if (iPage == 0) {
@@ -1190,12 +1206,16 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 					renderer->SetRendererType(FaceTrackingRenderer::R3D);
 				}
 				
+				if (wcsstr(deviceName, L"3D") != NULL) {
+
+					renderer->SetRendererType(FaceTrackingRenderer::R3D);
+				}
 				return TRUE;
 			} 
 
 		}
 		break;
-
+	*/
 	} 
 
 	return FALSE; 
@@ -1210,16 +1230,17 @@ HWND CreateTabControl(HWND hWnd, HINSTANCE hInstance)
 
 		if(hTab != NULL)
 		{
+			
 			TC_ITEM tc;
 			tc.mask = TCIF_TEXT;
-			tc.pszText = L"2D";
+			tc.pszText = L"3D Mesh";
 			tc.iImage = -1;
 			tc.lParam = 0;
 			TabCtrl_InsertItem(hTab, 0, &tc);
-			
+			/*
 			tc.pszText = L"3D";
 			TabCtrl_InsertItem(hTab, 1, &tc);
-			
+			*/
 		}
 		return hTab;
 	}
@@ -1284,26 +1305,28 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
 		return 1;
 	}
 
-	
+	/*
 	FaceTrackingRenderer2D* renderer2D = new FaceTrackingRenderer2D(dialogWindow);
 	if(renderer2D == NULL)
 	{
 		MessageBoxW(0, L"Failed to create 2D renderer", L"Face Viewer", MB_ICONEXCLAMATION | MB_OK);
 		return 1;
 	}
+	*/
 	
 	FaceTrackingRenderer3D* renderer3D = new FaceTrackingRenderer3D(dialogWindow, session);
 	if(renderer3D == NULL)
 	{
 		MessageBoxW(0, L"Failed to create 3D renderer", L"Face Viewer", MB_ICONEXCLAMATION | MB_OK);
-		delete renderer2D;
+		//delete renderer2D;
 		return 1;
 	}
-	renderer = new FaceTrackingRendererManager(renderer2D, renderer3D);
+	//renderer = new FaceTrackingRendererManager(renderer2D, renderer3D);
+	renderer = new FaceTrackingRendererManager(renderer3D);
 	if(renderer == NULL)
 	{
 		MessageBoxW(0, L"Failed to create renderer manager", L"Face Viewer", MB_ICONEXCLAMATION | MB_OK);
-		delete renderer2D;
+		//delete renderer2D;
 		delete renderer3D;
 		return 1;
 	}
@@ -1318,17 +1341,19 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
 	}
 
 	int iPage = TabCtrl_GetCurSel(hwndTab);
+	/*
 	if(iPage == 0)
 	{
 		renderer->SetRendererType(FaceTrackingRenderer::R2D);
-	}
-	// Only want one page
-	
+	}	
 	if(iPage == 1)
 	{
 		renderer->SetRendererType(FaceTrackingRenderer::R3D);
 	}
-	
+	*/
+	// Only need one renderer
+
+	renderer->SetRendererType(FaceTrackingRenderer::R3D);
 
 	// Create Rendering thread
 	CreateThread(NULL, NULL, RenderingThread, NULL, NULL, NULL);

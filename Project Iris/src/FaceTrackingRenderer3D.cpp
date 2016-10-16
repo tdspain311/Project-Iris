@@ -57,12 +57,12 @@ void FaceTrackingRenderer3D::DrawGraphics(PXCFaceData* faceOutput)
 	{
 		PXCFaceData::Face* trackedFace = faceOutput->QueryFaceByIndex(i);		
 		assert(trackedFace != NULL);
-		
+		/*
 		if (FaceTrackingUtilities::IsModuleSelected(m_window, IDC_LANDMARK) && trackedFace->QueryLandmarks() != NULL) 
 			DrawLandmark(trackedFace);
 		if (FaceTrackingUtilities::IsModuleSelected(m_window, IDC_POSE))
 			DrawPose(trackedFace);
-		
+		*/
 		if (trackedFace->QueryLandmarks() != NULL)
 			DrawLandmark(trackedFace);
 			DrawPose(trackedFace);

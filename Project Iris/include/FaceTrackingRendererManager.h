@@ -7,7 +7,8 @@
 class FaceTrackingRendererManager
 {
 public:
-	FaceTrackingRendererManager(FaceTrackingRenderer2D* renderer2D, FaceTrackingRenderer3D* renderer3D);
+	//FaceTrackingRendererManager(FaceTrackingRenderer2D* renderer2D, FaceTrackingRenderer3D* renderer3D);
+	FaceTrackingRendererManager(FaceTrackingRenderer3D* renderer3D);
 	~FaceTrackingRendererManager();
 
 	void SetRendererType(FaceTrackingRenderer::RendererType type);
@@ -23,7 +24,7 @@ public:
 	static void SignalProcessor();
 
 private:
-	FaceTrackingRenderer2D* m_renderer2D;
+	//FaceTrackingRenderer2D* m_renderer2D;
 	FaceTrackingRenderer3D* m_renderer3D;
 	FaceTrackingRenderer* m_currentRenderer;
 

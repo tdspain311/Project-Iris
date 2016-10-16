@@ -1,9 +1,15 @@
 #include "FaceTrackingRendererManager.h"
 
 extern HANDLE ghMutex;
-
+/*
 FaceTrackingRendererManager::FaceTrackingRendererManager(FaceTrackingRenderer2D* renderer2D, FaceTrackingRenderer3D* renderer3D) :
 	m_renderer2D(renderer2D), m_renderer3D(renderer3D), m_currentRenderer(NULL)
+{
+	m_rendererSignal = CreateEvent(NULL, FALSE, FALSE, NULL);
+}
+*/
+FaceTrackingRendererManager::FaceTrackingRendererManager(FaceTrackingRenderer3D* renderer3D) :
+	m_renderer3D(renderer3D), m_currentRenderer(NULL)
 {
 	m_rendererSignal = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
@@ -11,10 +17,10 @@ FaceTrackingRendererManager::FaceTrackingRendererManager(FaceTrackingRenderer2D*
 FaceTrackingRendererManager::~FaceTrackingRendererManager(void)
 {
 	CloseHandle(m_rendererSignal);
-	
+	/*
 	if(m_renderer2D != NULL)
 		delete m_renderer2D;
-	
+	*/
 	if(m_renderer3D != NULL)
 		delete m_renderer3D;
 }
@@ -25,7 +31,7 @@ void FaceTrackingRendererManager::SetRendererType(FaceTrackingRenderer::Renderer
 	dwWaitResult = WaitForSingleObject(ghMutex,	INFINITE);
 	if(dwWaitResult == WAIT_OBJECT_0)
 	{
-		
+		/*
 		if(type == FaceTrackingRenderer::R2D)
 		{
 			m_currentRenderer = m_renderer2D;
@@ -34,7 +40,7 @@ void FaceTrackingRendererManager::SetRendererType(FaceTrackingRenderer::Renderer
 		{
 			m_currentRenderer = m_renderer3D;
 		}
-		
+		*/
 		m_currentRenderer = m_renderer3D;
 
 		if(!ReleaseMutex(ghMutex))
@@ -56,13 +62,13 @@ void FaceTrackingRendererManager::Render()
 
 void FaceTrackingRendererManager::SetSenseManager(PXCSenseManager* senseManager)
 {
-	m_renderer2D->SetSenseManager(senseManager);
+	//m_renderer2D->SetSenseManager(senseManager);
 	m_renderer3D->SetSenseManager(senseManager);
 }
 
 void FaceTrackingRendererManager::SetNumberOfLandmarks(int numLandmarks)
 {
-	m_renderer2D->SetNumberOfLandmarks(numLandmarks);
+	//m_renderer2D->SetNumberOfLandmarks(numLandmarks);
 	m_renderer3D->SetNumberOfLandmarks(numLandmarks);
 }
 
@@ -78,7 +84,7 @@ void FaceTrackingRendererManager::DrawBitmap(PXCCapture::Sample* sample)
 
 void FaceTrackingRendererManager::SetOutput(PXCFaceData* output)
 {
-	m_renderer2D->SetOutput(output);
+	//m_renderer2D->SetOutput(output);
 	m_renderer3D->SetOutput(output);
 }
 

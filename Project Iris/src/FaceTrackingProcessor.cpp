@@ -72,6 +72,8 @@ void FaceTrackingProcessor::CheckForDepthStream(PXCSenseManager* pp, HWND hwndDl
 	PXCFaceConfiguration::TrackingModeType trackingMode = config->GetTrackingMode();
 	config->Release();
 	
+	/*
+	// Checks devices in profile for depth stream
 	if (trackingMode == PXCFaceConfiguration::FACE_MODE_COLOR_PLUS_DEPTH)
 	{
 		PXCCapture::Device::StreamProfileSet profiles={};
@@ -84,7 +86,7 @@ void FaceTrackingProcessor::CheckForDepthStream(PXCSenseManager* pp, HWND hwndDl
 			MessageBox(hwndDlg, msg.c_str(), L"Face Tracking", MB_OK);            
 		}
 	}
-	
+	*/
 }
 
 void FaceTrackingProcessor::Process(HWND dialogWindow) {
@@ -157,11 +159,9 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
 	}
 
 	// Enable Gaze Algo
-
 	config->QueryGaze()->isEnabled = true;
 
 	// set dominant eye
-
 	if (dominant_eye) {
 	
 		PXCFaceData::GazeCalibData::DominantEye eye = (PXCFaceData::GazeCalibData::DominantEye)(dominant_eye - 1);
@@ -170,12 +170,11 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
 	}
 
 	// set tracking mode
-
-	config->SetTrackingMode(FaceTrackingUtilities::GetCheckedProfile(dialogWindow));
+	//config->SetTrackingMode(FaceTrackingUtilities::GetCheckedProfile(dialogWindow));
+	config->SetTrackingMode(PXCFaceConfiguration::TrackingModeType::FACE_MODE_COLOR_PLUS_DEPTH);
 	config->ApplyChanges();
 
 	// Load Calibration File
-
 	bool need_calibration = true;
 
 	if (isLoadCalibFile) {
@@ -245,12 +244,15 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
     FaceTrackingAlertHandler alertHandler(dialogWindow);
 
 	// Enables checkbox options
-	
     if (FaceTrackingUtilities::GetCheckedModule(dialogWindow)) {
 
-        config->detection.isEnabled = FaceTrackingUtilities::IsModuleSelected(dialogWindow, IDC_LOCATION);
-        config->landmarks.isEnabled = FaceTrackingUtilities::IsModuleSelected(dialogWindow, IDC_LANDMARK);
-        config->pose.isEnabled = FaceTrackingUtilities::IsModuleSelected(dialogWindow, IDC_POSE);
+        //config->detection.isEnabled = FaceTrackingUtilities::IsModuleSelected(dialogWindow, IDC_LOCATION);
+        //config->landmarks.isEnabled = FaceTrackingUtilities::IsModuleSelected(dialogWindow, IDC_LANDMARK);
+        //config->pose.isEnabled = FaceTrackingUtilities::IsModuleSelected(dialogWindow, IDC_POSE);
+
+		config->detection.isEnabled = true;
+		config->landmarks.isEnabled = true;
+		config->pose.isEnabled = true;
 			
         config->EnableAllAlerts();
         config->SubscribeAlert(&alertHandler);
