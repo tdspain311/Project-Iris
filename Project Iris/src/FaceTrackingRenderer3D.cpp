@@ -1,6 +1,10 @@
 #include "FaceTrackingRenderer3D.h"
 #include "FaceTrackingUtilities.h"
 #include "pxcprojection.h"
+#include <iostream>
+
+static BOOL DEBUG = FALSE;
+
 
 FaceTrackingRenderer3D::~FaceTrackingRenderer3D()
 {
@@ -17,7 +21,7 @@ bool FaceTrackingRenderer3D::ProjectVertex(const PXCPoint3DF32 &v, int &x, int &
 
 	return ((radius <= x) && (x < m_outputImageInfo.width-radius) && (radius <= y) && (y < m_outputImageInfo.height-radius));
 }
-
+/*
 void FaceTrackingRenderer3D::CalcCenterOfMass(PXCFaceData::LandmarkPoint &centerOfMass,PXCFaceData::LandmarkPoint* points)
 {
 	centerOfMass.world.x = 0.0;
@@ -46,7 +50,7 @@ void FaceTrackingRenderer3D::CalcCenterOfMass(PXCFaceData::LandmarkPoint &center
 	centerOfMass.world.y /= numStartPointsTodevied;
 	centerOfMass.world.z /= numStartPointsTodevied;
 }
-
+*/
 void FaceTrackingRenderer3D::DrawGraphics(PXCFaceData* faceOutput)
 {
 	assert(faceOutput != NULL);
@@ -137,7 +141,7 @@ void FaceTrackingRenderer3D::DrawBitmap(PXCCapture::Sample* sample)
 		}
 		if (vertices) delete[] vertices;
 
-		if (m_bitmap) 
+		if (m_bitmap)
 		{
 			DeleteObject(m_bitmap);
 			m_bitmap = 0;
@@ -147,8 +151,8 @@ void FaceTrackingRenderer3D::DrawBitmap(PXCCapture::Sample* sample)
 		HDC dc = GetDC(hwndPanel);
 		BITMAPINFO binfo;
 		memset(&binfo, 0, sizeof(binfo));
-		binfo.bmiHeader.biWidth = m_outputImageData.pitches[0]/4;
-		binfo.bmiHeader.biHeight = - (int)m_outputImageInfo.height;
+		binfo.bmiHeader.biWidth = m_outputImageData.pitches[0] / 4;
+		binfo.bmiHeader.biHeight = -(int)m_outputImageInfo.height;
 		binfo.bmiHeader.biBitCount = 32;
 		binfo.bmiHeader.biPlanes = 1;
 		binfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -175,13 +179,13 @@ void FaceTrackingRenderer3D::DrawLandmark(PXCFaceData::Face* trackedFace)
 	HDC dc1 = GetDC(panelWindow);
 	HDC dc2 = CreateCompatibleDC(dc1);
 
-	if (!dc2) 
+	if (!dc2)
 	{
 		ReleaseDC(panelWindow, dc1);
 		return;
 	}
 
-	HFONT hFont = CreateFont(16, 8, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 2, 0, L"MONOSPACE");
+	HFONT hFont = CreateFont(48, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 2, 0, L"MONOSPACE");
 
 	if (!hFont)
 	{
@@ -199,6 +203,11 @@ void FaceTrackingRenderer3D::DrawLandmark(PXCFaceData::Face* trackedFace)
 	GetObject(m_bitmap, sizeof(bitmap), &bitmap);
 
 	pxcI32 numPoints = landmarkData->QueryNumPoints();
+
+	// TESTING
+	//pxcI32 numLeftEyePoints = landmarkData->QueryNumPointsByGroup(PXCFaceData::LandmarksGroupType::LANDMARK_GROUP_LEFT_EYE);
+	//pxcI32 numRightEyePoints = landmarkData->QueryNumPointsByGroup(PXCFaceData::LandmarksGroupType::LANDMARK_GROUP_RIGHT_EYE);
+
 	if (numPoints != m_numLandmarks)
 	{
 		DeleteObject(hFont);
@@ -208,26 +217,109 @@ void FaceTrackingRenderer3D::DrawLandmark(PXCFaceData::Face* trackedFace)
 	}
 
 	PXCFaceData::LandmarkPoint* points = new PXCFaceData::LandmarkPoint[numPoints];
+	//PXCFaceData::LandmarkPoint* eyeLeftPoints = new PXCFaceData::LandmarkPoint[numLeftEyePoints];
+	//PXCFaceData::LandmarkPoint* eyeRightPoints = new PXCFaceData::LandmarkPoint[numRightEyePoints];
 
-	for (int l = 0; l < numPoints; l++) //initialize Array
+	//initialize Array
+	for (int l = 0; l < numPoints; l++) 
 	{
 		points[l].world.x = 0.0;
 		points[l].world.y = 0.0;
 		points[l].world.z = 0.0;
 	}
+	// TESTING: Get only eye points
+	//landmarkData->QueryPointsByGroup(PXCFaceData::LandmarksGroupType::LANDMARK_GROUP_LEFT_EYE, eyeLeftPoints);
+	//landmarkData->QueryPointsByGroup(PXCFaceData::LandmarksGroupType::LANDMARK_GROUP_RIGHT_EYE, eyeRightPoints);
 
-	PXCFaceData::LandmarkPoint centerOfMass;
+	
+	landmarkData->QueryPoints(points);
 
-	landmarkData->QueryPoints(points); //data set for all landmarks in frame
+	PXCFaceData::LandmarkPoint EyeLeft = points[landmarkData->QueryPointIndex(PXCFaceData::LandmarkType::LANDMARK_EYE_LEFT_CENTER)];
+	PXCFaceData::LandmarkPoint EyeRight = points[landmarkData->QueryPointIndex(PXCFaceData::LandmarkType::LANDMARK_EYE_RIGHT_CENTER)];
+
+	// Scale to canvas coordinate
+	EyeLeft.world.x *= 1000.0f;
+	EyeLeft.world.y *= 1000.0f;
+	EyeLeft.world.z *= 1000.0f;
+
+	EyeRight.world.x *= 1000.0f;
+	EyeRight.world.y *= 1000.0f;
+	EyeRight.world.z *= 1000.0f;
+	
+	int iLx = 0, iLy = 0, iRx = 0, iRy = 0;
+
+	if (ProjectVertex(EyeLeft.world, iLx, iLy, 1) && ProjectVertex(EyeRight.world, iRx, iRy, 1))
+	{
+		if (EyeLeft.confidenceWorld > 0 && EyeRight.confidenceWorld > 0)
+		{
+			SetTextColor(dc2, RGB(255, 0, 255));
+			TextOut(dc2, iLx, iLy, L"•", 1);
+			TextOut(dc2, iRx, iRy, L"•", 1);
+		}
+	}
+	
+	//PXCFaceData::LandmarkPoint centerOfMass;
+
+	//landmarkData->QueryPoints(points); //data set for all landmarks in frame
+
 
 	//convert depth data is to millimeters
+	/*
 	for (int l = 0; l < numPoints; l++)
 	{
 		points[l].world.x *= 1000.0f;
 		points[l].world.y *= 1000.0f;
 		points[l].world.z *= 1000.0f;
 	}
+	*/
 
+	// TESTING
+	// Project Left Eye group
+	/*
+	for (int l = 0; l < numLeftEyePoints; l++)
+	{
+		eyeLeftPoints[l].world.x *= 1000.0f;
+		eyeLeftPoints[l].world.y *= 1000.0f;
+		eyeLeftPoints[l].world.z *= 1000.0f;
+	}
+
+	for (int i = 0; i < numLeftEyePoints; i++)
+	{
+		int px = 0, py = 0;
+
+		if (ProjectVertex(eyeLeftPoints[i].world, px, py, 1))
+		{
+			if (eyeLeftPoints[i].confidenceWorld > 0)
+			{
+				SetTextColor(dc2, RGB(255, 255, 0));
+				TextOut(dc2, px, py, L"•", 1);
+			}
+		}
+	}
+
+	// Project Left Eye group
+	for (int l = 0; l < numRightEyePoints; l++)
+	{
+		eyeRightPoints[l].world.x *= 1000.0f;
+		eyeRightPoints[l].world.y *= 1000.0f;
+		eyeRightPoints[l].world.z *= 1000.0f;
+	}
+
+	for (int i = 0; i < numRightEyePoints; i++)
+	{
+		int px = 0, py = 0;
+
+		if (ProjectVertex(eyeRightPoints[i].world, px, py, 1))
+		{
+			if (eyeRightPoints[i].confidenceWorld > 0)
+			{
+				SetTextColor(dc2, RGB(255, 255, 0));
+				TextOut(dc2, px, py, L"•", 1);
+			}
+		}
+	}
+	*/
+	/*
 	for (int j = 0; j < numPoints; j++)
 	{
 		int ix = 0, iy = 0;
@@ -246,8 +338,14 @@ void FaceTrackingRenderer3D::DrawLandmark(PXCFaceData::Face* trackedFace)
 			}
 		}
 	}
-		
-	if (points) delete[] points;
+	*/
+	
+	if (points)
+	{
+		delete[] points;
+		//delete[] eyeLeftPoints;
+		//delete[] eyeRightPoints;
+	}
 
 	DeleteObject(hFont);
 	DeleteDC(dc2);
@@ -296,17 +394,13 @@ void FaceTrackingRenderer3D::DrawPose(PXCFaceData::Face* trackedFace)
 	poseData->QueryHeadPosition(&outFaceCenterPoint);
 
 	int headCenter_x = 0, headCenter_y = 0;	
-	if(ProjectVertex(outFaceCenterPoint.headCenter, headCenter_x, headCenter_y, 2))
+	if(ProjectVertex(outFaceCenterPoint.headCenter, headCenter_x, headCenter_y, 1))
 	{
+		
 		if(poseData->QueryConfidence() > 0 && outFaceCenterPoint.confidence > 0)
 		{
 			SetTextColor(dc2, RGB(0, 0, 255));
 			TextOut(dc2, headCenter_x, headCenter_y, L"•", 1);
-		}
-		else
-		{
-			SetTextColor(dc2, RGB(255, 255, 255));
-			TextOut(dc2, headCenter_x, headCenter_y, L"x", 1);
 		}
 	
 		const PXCFaceData::LandmarksData *landmarkData = trackedFace->QueryLandmarks();
@@ -320,51 +414,80 @@ void FaceTrackingRenderer3D::DrawPose(PXCFaceData::Face* trackedFace)
 		}
 
 		PXCFaceData::LandmarkPoint* points = new PXCFaceData::LandmarkPoint[landmarkData->QueryNumPoints()];
-		
+		landmarkData->QueryPoints(points);
+
+		PXCFaceData::LandmarkPoint nosePoint = points[landmarkData->QueryPointIndex(PXCFaceData::LandmarkType::LANDMARK_NOSE_TIP)];
+		/*
 		points[29].world.x = 0.0;
 		points[29].world.y = 0.0;
 		points[29].world.z = 0.0;
-
-		landmarkData->QueryPoints(points); //data set for all landmarks in frame
-
+		*/
+		// Initialize nose point to 0
+		
+		nosePoint.world.x = 0.0;
+		nosePoint.world.y = 0.0;
+		nosePoint.world.z = 0.0;
+		
+		// Scale in coords
+		nosePoint.world.x *= 1000.0f;
+		nosePoint.world.y *= 1000.0f;
+		nosePoint.world.z *= 1000.0f;
+		/*
 		points[29].world.x *= 1000.0f;
 		points[29].world.y *= 1000.0f;
 		points[29].world.z *= 1000.0f;
-
+		*/
 		int noseTip_x = 0, noseTip_y = 0;
 
-		if(ProjectVertex(points[29].world, noseTip_x, noseTip_y, 1))
+		//if (ProjectVertex(points[29].world, noseTip_x, noseTip_y, 1))
+		if (ProjectVertex(nosePoint.world, noseTip_x, noseTip_y, 1))
 		{
 			PXCPoint3DF32 direction;
-			direction.x = headCenter_x - noseTip_x;
-			direction.y = headCenter_y - noseTip_y;
+			//direction.x = headCenter_x - noseTip_x;
+			//direction.y = headCenter_y - noseTip_y;
+			direction.x = noseTip_x - headCenter_x;
+			direction.y = noseTip_y - headCenter_y;
 			
-			HPEN lineColor;
+			HPEN poseLine;
 			
 			if (poseData->QueryConfidence() > 0)
 			{
-				lineColor = CreatePen(PS_SOLID, 3, RGB(0 ,255 ,255));
-			}
-			else
-			{
-				lineColor = CreatePen(PS_SOLID, 3, RGB(255 ,0 , 0));
+				poseLine = CreatePen(PS_SOLID, 5, RGB(255 , 0, 0));
 			}
 
-			if (!lineColor)
+			if (!poseLine)
 			{
 				DeleteObject(hFont);
 				DeleteDC(dc2);
 				ReleaseDC(panelWindow, dc1);
 				return;
 			}
-			SelectObject(dc2, lineColor);
+			SelectObject(dc2, poseLine);
 
-			MoveToEx(dc2, noseTip_x, noseTip_y, 0);
-			LineTo(dc2, noseTip_x + 1.2 * direction.x, noseTip_y + 1.2 * direction.y);
+			if (DEBUG) {
+				std::cout << "Direction X: " << direction.x << " Y: " << direction.y << std::endl;
+				std::cout << "Head X: " << headCenter_x << " Y: " << headCenter_y << std::endl;
+				std::cout << "Nose X: " << noseTip_x << " Y: " << noseTip_y << std::endl;
+			}
 
-			DeleteObject(lineColor);
+
+			// TESTING
+			// Look into PoseQuaternion
+
+			int endPoseX = noseTip_x - (1.5 * direction.x);
+			int endPoseY = noseTip_y - (1.5 * direction.y);
+
+			//MoveToEx(dc2, noseTip_x, noseTip_y, 0);
+			//LineTo(dc2, noseTip_x + 1.2 * direction.x, noseTip_y + 1.2 * direction.y);
+			MoveToEx(dc2, headCenter_x, headCenter_y, 0);
+			LineTo(dc2, endPoseX, endPoseY);
+
+			DeleteObject(poseLine);
 		}
+
+		if (points) delete[] points;
 	}
+
 	
 	DeleteObject(hFont);
 	DeleteDC(dc2);

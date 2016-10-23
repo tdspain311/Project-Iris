@@ -11,7 +11,8 @@
 #include "pxcfaceconfiguration.h"
 #include "pxcmetadata.h"
 #include "service/pxcsessionservice.h"
-#include "FaceTrackingFrameRateCalculator.h"
+
+#include "FPSCalculator.h"
 #include "FaceTrackingRendererManager.h"
 //#include "FaceTrackingRenderer2D.h"
 #include "FaceTrackingRenderer3D.h"
@@ -19,6 +20,7 @@
 #include "FaceTrackingProcessor.h"
 #include "Strsafe.h"
 #include <string.h>
+#include <iostream>
 
 WCHAR user_name[40];
 pxcCHAR calibFileName[1024] = { 0 };
@@ -59,6 +61,8 @@ extern int dominant_eye;
 typedef DWORD (WINAPI *make_layered)(HWND, DWORD, BYTE, DWORD);
 static make_layered set_layered_window = NULL;
 static BOOL dll_initialized = FALSE;
+
+static BOOL DEBUG = TRUE;
 
 bool make_transparent(HWND hWnd) {
 
@@ -255,19 +259,19 @@ void InitCalibWindows(CalibMode mode) {
 
 	case mode_calib:
 		InitBackWindow(&ghWndEyeBack, RGB(240, 240, 240), L"Background");
-		InitSimpleWindow(&ghWndEyePoint, 35, RGB(0, 0, 255), L"EyePoint1");  // 35-50
+		InitSimpleWindow(&ghWndEyePoint, 35, RGB(0, 0, 255), L"GPI Calibrate");  // 35-50
 		break;
 
 	case mode_live:
-		InitTransWindow(&ghWndEyePoint, 100, RGB(0, 255, 0), L"EyePoint2");
+		InitTransWindow(&ghWndEyePoint, 30, RGB(0, 255, 255), L"GPI Live");
 		break;
 
 	case mode_playback:
-		InitTransWindow(&ghWndEyePoint, 100, RGB(255, 0, 255), L"EyePoint3");
+		InitTransWindow(&ghWndEyePoint, 30, RGB(255, 255, 0), L"GPI Clip");
 		break;
 
 	case mode_record:
-		InitSimpleWindow(&ghWndEyePoint, 35, RGB(255, 0, 0), L"EyePoint4");
+		InitSimpleWindow(&ghWndEyePoint, 35, RGB(255, 0, 0), L"GPI Record");
 		break;
 
 	}
@@ -298,7 +302,12 @@ void UpdateTracking() {
 
 		} else {
 
-			SetWindowPos(ghWndEyePoint, NULL, eye_point_x - width/2, eye_point_y - height/2, width, height, NULL);
+			// Gaze position
+			if (DEBUG)
+			{
+				std::cout << "Gaze Position X: " << eye_point_x << " || Y: " << eye_point_y << std::endl;
+			}
+			//SetWindowPos(ghWndEyePoint, NULL, eye_point_x - width/2, eye_point_y - height/2, width, height, NULL);
 
 		}
 
@@ -1232,7 +1241,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 	return FALSE; 
 
 } 
-
+/*
 HWND CreateTabControl(HWND hWnd, HINSTANCE hInstance)
 {
 	if(hWnd != NULL && hInstance != NULL)
@@ -1248,18 +1257,26 @@ HWND CreateTabControl(HWND hWnd, HINSTANCE hInstance)
 			tc.iImage = -1;
 			tc.lParam = 0;
 			TabCtrl_InsertItem(hTab, 0, &tc);
-			/*
+			
 			tc.pszText = L"3D";
 			TabCtrl_InsertItem(hTab, 1, &tc);
-			*/
+			
 		}
 		return hTab;
 	}
 	return NULL;
 }
-
+*/
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
-
+	
+	if (DEBUG)
+	{
+		AllocConsole();
+		freopen("CONIN$", "r", stdin);
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+	}
+	
 	// Initialize
 	// Deprecated use InitCommonControlsEx
 	//InitCommonControls();
@@ -1306,16 +1323,17 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
 
 	int statusWindowParts[] = {230, -1};
 	SendMessage(statusWindow, SB_SETPARTS, sizeof(statusWindowParts)/sizeof(int), (LPARAM) statusWindowParts);
-	SendMessage(statusWindow, SB_SETTEXT, (WPARAM)(INT) 0, (LPARAM) (LPSTR) TEXT("OK"));
+	SendMessage(statusWindow, SB_SETTEXT, (WPARAM)(INT) 0, (LPARAM) (LPSTR) TEXT("Ready"));
 	UpdateWindow(dialogWindow);
 
+	/*
 	HWND hwndTab = CreateTabControl(dialogWindow, hInstance);
 	if (!hwndTab) 
 	{
 		MessageBoxW(0, L"Failed to create tab control", L"Face Viewer", MB_ICONEXCLAMATION | MB_OK);
 		return 1;
 	}
-
+	*/
 	/*
 	FaceTrackingRenderer2D* renderer2D = new FaceTrackingRenderer2D(dialogWindow);
 	if(renderer2D == NULL)
@@ -1351,7 +1369,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
 		return 1;
 	}
 
-	int iPage = TabCtrl_GetCurSel(hwndTab);
+	//int iPage = TabCtrl_GetCurSel(hwndTab);
 	/*
 	if(iPage == 0)
 	{
