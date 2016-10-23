@@ -10,7 +10,7 @@ enum StatusWindowPart { statusPart, alertPart };
 extern std::map<int, PXCFaceConfiguration::TrackingModeType> s_profilesMap;
 extern std::map<int, PXCCapture::DeviceInfo> g_deviceInfoMap;
 
-class FaceTrackingUtilities
+class Utilities
 {
 public:
 	static int GetChecked(HMENU menu);

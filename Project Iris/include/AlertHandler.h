@@ -3,10 +3,10 @@
 #include "pxcfaceconfiguration.h"
 #include <windows.h>
 
-class FaceTrackingAlertHandler : public PXCFaceConfiguration::AlertHandler
+class AlertHandler : public PXCFaceConfiguration::AlertHandler
 {
 public:
-	FaceTrackingAlertHandler(HWND hwndDlg);
+	AlertHandler(HWND hwndDlg);
 	virtual void PXCAPI OnFiredAlert(const PXCFaceData::AlertData *alertData);
 
 private:

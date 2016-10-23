@@ -1,44 +1,46 @@
-﻿#include "FaceTrackingRenderer.h"
-#include "FaceTrackingUtilities.h"
-#include "pxccapture.h"
-#include <map>
+﻿#include <map>
 
-FaceTrackingRenderer::~FaceTrackingRenderer()
+#include "pxccapture.h"
+
+#include "Renderer.h"
+#include "Utilities.h"
+
+Renderer::~Renderer()
 {
 	if (m_landmarkPoints != NULL)
 		delete[] m_landmarkPoints;
 }
 
-FaceTrackingRenderer::FaceTrackingRenderer(HWND window) : m_window(window)
+Renderer::Renderer(HWND window) : m_window(window)
 {
 	m_landmarkPoints = NULL;
 	m_senseManager = NULL;
 	//m_expressionMap = InitExpressionsMap();
 }
 
-void FaceTrackingRenderer::SetOutput(PXCFaceData* output)
+void Renderer::SetOutput(PXCFaceData* output)
 {
 	m_currentFrameOutput = output;
 }
 
-void FaceTrackingRenderer::SetSenseManager(PXCSenseManager* senseManager)
+void Renderer::SetSenseManager(PXCSenseManager* senseManager)
 {
 	m_senseManager = senseManager;
 }
 
-PXCSenseManager* FaceTrackingRenderer::GetSenseManager()
+PXCSenseManager* Renderer::GetSenseManager()
 {
 	return m_senseManager;
 }
 
-void FaceTrackingRenderer::Render()
+void Renderer::Render()
 {
 	DrawFrameRate();
 	DrawGraphics(m_currentFrameOutput);
 	RefreshUserInterface();
 }
 
-void FaceTrackingRenderer::DrawFrameRate()
+void Renderer::DrawFrameRate()
 {
 	m_frameRateCalcuator.Tick();
 	if (m_frameRateCalcuator.IsFrameRateReady())
@@ -47,11 +49,11 @@ void FaceTrackingRenderer::DrawFrameRate()
 
 		pxcCHAR line[1024];
 		swprintf_s<1024>(line, L"Rate (%d fps)", fps);
-		FaceTrackingUtilities::SetStatus(m_window, line, statusPart);
+		Utilities::SetStatus(m_window, line, statusPart);
 	}
 }
 
-void FaceTrackingRenderer::RefreshUserInterface()
+void Renderer::RefreshUserInterface()
 {
 	if (!m_bitmap) return;
 
@@ -122,7 +124,7 @@ void FaceTrackingRenderer::RefreshUserInterface()
 	 DeleteObject(bitmap);
 }
 
-RECT FaceTrackingRenderer::GetResizeRect(RECT rectangle, BITMAP bitmap)
+RECT Renderer::GetResizeRect(RECT rectangle, BITMAP bitmap)
 {
 	RECT resizedRectangle;
 	float sx = (float)rectangle.right / (float)bitmap.bmWidth;
@@ -159,7 +161,7 @@ std::map<PXCFaceData::ExpressionsData::FaceExpression, std::wstring> FaceTrackin
 }
 */
 
-void FaceTrackingRenderer::SetNumberOfLandmarks(int numLandmarks)
+void Renderer::SetNumberOfLandmarks(int numLandmarks)
 {
 	m_numLandmarks = numLandmarks;
 	m_landmarkPoints = new PXCFaceData::LandmarkPoint[numLandmarks];

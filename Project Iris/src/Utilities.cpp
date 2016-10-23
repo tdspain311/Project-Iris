@@ -1,7 +1,8 @@
+#include "Utilities.h"
 #include <WindowsX.h>
-#include "FaceTrackingUtilities.h"
-#include "resource.h"
 #include <commctrl.h>
+#include "resource.h"
+
 /*
 PXCFaceConfiguration::TrackingModeType FaceTrackingUtilities::GetCheckedProfile(HWND dialogWindow)
 {
@@ -12,12 +13,12 @@ PXCFaceConfiguration::TrackingModeType FaceTrackingUtilities::GetCheckedProfile(
 }
 */
 
-bool FaceTrackingUtilities::GetPlaybackState(HWND DialogWindow)
+bool Utilities::GetPlaybackState(HWND DialogWindow)
 {
 	return (GetMenuState(GetMenu(DialogWindow), ID_MODE_PLAYBACK, MF_BYCOMMAND) & MF_CHECKED) != 0;
 }
 
-bool FaceTrackingUtilities::GetRecordState(HWND hwndDlg)
+bool Utilities::GetRecordState(HWND hwndDlg)
 {
 	return (GetMenuState(GetMenu(hwndDlg), ID_MODE_RECORD, MF_BYCOMMAND) & MF_CHECKED) != 0;
 }
@@ -28,7 +29,7 @@ bool FaceTrackingUtilities::IsModuleSelected(HWND hwndDlg, const int moduleID)
 }
 */
 
-void FaceTrackingUtilities::SetStatus(HWND dialogWindow, pxcCHAR *line, StatusWindowPart part)
+void Utilities::SetStatus(HWND dialogWindow, pxcCHAR *line, StatusWindowPart part)
 {
 	HWND hwndStatus = GetDlgItem(dialogWindow, IDC_STATUS);
 	SendMessage(hwndStatus, SB_SETTEXT, (WPARAM)(INT) part, (LPARAM) (LPSTR) line);

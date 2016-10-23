@@ -1,5 +1,4 @@
-
-#include "FaceTrackingProcessor.h"
+#include "Processor.h"
 
 #include <assert.h>
 #include <string>
@@ -9,13 +8,14 @@
 #include "pxcfacedata.h"
 #include "pxcfaceconfiguration.h"
 #include "pxcsensemanager.h"
-#include "FaceTrackingUtilities.h"
-#include "FaceTrackingAlertHandler.h"
-#include "FaceTrackingRendererManager.h"
 #include "resource.h"
 
+#include "Utilities.h"
+#include "AlertHandler.h"
+#include "RendererManager.h"
+
 extern PXCSession* session;
-extern FaceTrackingRendererManager* renderer;
+extern RendererManager* renderer;
 
 extern volatile bool isStopped;
 extern volatile bool isActiveApp;
@@ -34,27 +34,27 @@ short calibBuffersize = 0;
 int calib_status = 0; // PXCFaceData::GazeCalibData::CalibratoinStatus
 int dominant_eye = 0; // PXCFaceData::GazeCalibData::DominantEye
 
-FaceTrackingProcessor::FaceTrackingProcessor(HWND window) : m_window(window), m_registerFlag(false), m_unregisterFlag(false) {
+Processor::Processor(HWND window) : m_window(window), m_registerFlag(false), m_unregisterFlag(false) {
 
 	// constructor
 
 }
 
-void FaceTrackingProcessor::PerformRegistration()
+void Processor::PerformRegistration()
 {
 	m_registerFlag = false;
 	if(m_output->QueryFaceByIndex(0))
 		m_output->QueryFaceByIndex(0)->QueryRecognition()->RegisterUser();
 }
 
-void FaceTrackingProcessor::PerformUnregistration()
+void Processor::PerformUnregistration()
 {
 	m_unregisterFlag = false;
 	if(m_output->QueryFaceByIndex(0))
 		m_output->QueryFaceByIndex(0)->QueryRecognition()->UnregisterUser();
 }
 
-void FaceTrackingProcessor::CheckForDepthStream(PXCSenseManager* pp, HWND hwndDlg)
+void Processor::CheckForDepthStream(PXCSenseManager* pp, HWND hwndDlg)
 {
 	PXCFaceModule* faceModule = pp->QueryFace();
 	if (faceModule == NULL) 
@@ -89,7 +89,7 @@ void FaceTrackingProcessor::CheckForDepthStream(PXCSenseManager* pp, HWND hwndDl
 	*/
 }
 
-void FaceTrackingProcessor::Process(HWND dialogWindow) {
+void Processor::Process(HWND dialogWindow) {
 
 	// set startup mode
 
@@ -97,7 +97,7 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
 
 	if (senseManager == NULL) {
 
-		FaceTrackingUtilities::SetStatus(dialogWindow, L"Failed to create an SDK SenseManager", statusPart);
+		Utilities::SetStatus(dialogWindow, L"Failed to create an SDK SenseManager", statusPart);
 		return;
 
 	}
@@ -113,11 +113,11 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
 
 	pxcStatus status = PXC_STATUS_NO_ERROR;
 
-	if (FaceTrackingUtilities::GetRecordState(dialogWindow)) { // we are recording
+	if (Utilities::GetRecordState(dialogWindow)) { // we are recording
 
 		status = captureManager->SetFileName(rssdkFileName, true);
 
-	} else if (FaceTrackingUtilities::GetPlaybackState(dialogWindow)) { // we are playing
+	} else if (Utilities::GetPlaybackState(dialogWindow)) { // we are playing
 
 		status = captureManager->SetFileName(rssdkFileName, false);
 		senseManager->QueryCaptureManager()->SetRealtime(true);
@@ -126,7 +126,7 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
 
 	if (status < PXC_STATUS_NO_ERROR) {
 
-		FaceTrackingUtilities::SetStatus(dialogWindow, L"Failed to Set Record/Playback File", statusPart);
+		Utilities::SetStatus(dialogWindow, L"Failed to Set Record/Playback File", statusPart);
 		return;
 
 	}
@@ -137,7 +137,7 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
 
 	/* Initialize */
 	
-	FaceTrackingUtilities::SetStatus(dialogWindow, L"Init Started", statusPart);
+	Utilities::SetStatus(dialogWindow, L"Init Started", statusPart);
 
 	PXCFaceModule* faceModule = senseManager->QueryFace();
 	
@@ -228,7 +228,7 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
 
 		if (senseManager->Init() < PXC_STATUS_NO_ERROR) {
 
-			FaceTrackingUtilities::SetStatus(dialogWindow, L"Init Failed", statusPart);
+			Utilities::SetStatus(dialogWindow, L"Init Failed", statusPart);
 			PostMessage(dialogWindow, WM_COMMAND, ID_STOP, 0);
 			return;
 
@@ -240,7 +240,7 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
 	senseManager->QueryCaptureManager()->QueryDevice()->QueryDeviceInfo(&info);
 
     CheckForDepthStream(senseManager, dialogWindow);
-    FaceTrackingAlertHandler alertHandler(dialogWindow);
+    AlertHandler alertHandler(dialogWindow);
 
 	// Enables checkbox options
     //if (FaceTrackingUtilities::GetCheckedModule(dialogWindow)) {
@@ -261,7 +261,7 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
     //}
 	
 
-    FaceTrackingUtilities::SetStatus(dialogWindow, L"Streaming", statusPart);
+    Utilities::SetStatus(dialogWindow, L"Streaming", statusPart);
     m_output = faceModule->CreateOutput();
 
 	int failed_counter = 0;
@@ -444,7 +444,7 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
         }
 
         m_output->Release();
-        FaceTrackingUtilities::SetStatus(dialogWindow, L"Stopped", statusPart);
+        Utilities::SetStatus(dialogWindow, L"Stopped", statusPart);
 
     }
 
@@ -454,12 +454,12 @@ void FaceTrackingProcessor::Process(HWND dialogWindow) {
 
 }
 
-void FaceTrackingProcessor::RegisterUser()
+void Processor::RegisterUser()
 {
 	m_registerFlag = true;
 }
 
-void FaceTrackingProcessor::UnregisterUser()
+void Processor::UnregisterUser()
 {
 	m_unregisterFlag = true;
 }

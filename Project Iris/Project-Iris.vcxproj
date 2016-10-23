@@ -232,24 +232,24 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\FaceTrackingProcessor.cpp" />
-    <ClCompile Include="src\FaceTrackingAlertHandler.cpp" />
+    <ClCompile Include="src\Processor.cpp" />
+    <ClCompile Include="src\AlertHandler.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\FaceTrackingFrameRateCalculator.cpp" />
-    <ClCompile Include="src\FaceTrackingRendererManager.cpp" />
-    <ClCompile Include="src\FaceTrackingRenderer.cpp" />
-    <ClCompile Include="src\FaceTrackingRenderer3D.cpp" />
-    <ClCompile Include="src\FaceTrackingUtilities.cpp" />
+    <ClCompile Include="src\FPSCalculator.cpp" />
+    <ClCompile Include="src\RendererManager.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\Graphics.cpp" />
+    <ClCompile Include="src\Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\FaceTrackingRendererManager.h" />
+    <ClInclude Include="include\RendererManager.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="include\FaceTrackingProcessor.h" />
-    <ClInclude Include="include\FaceTrackingRenderer.h" />
-    <ClInclude Include="include\FaceTrackingAlertHandler.h" />
-    <ClInclude Include="include\FaceTrackingFrameRateCalculator.h" />
-    <ClInclude Include="include\FaceTrackingUtilities.h" />
-    <ClInclude Include="include\FaceTrackingRenderer3D.h" />
+    <ClInclude Include="include\Processor.h" />
+    <ClInclude Include="include\Renderer.h" />
+    <ClInclude Include="include\AlertHandler.h" />
+    <ClInclude Include="include\FPSCalculator.h" />
+    <ClInclude Include="include\Utilities.h" />
+    <ClInclude Include="include\Graphics.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="project-iris.rc">

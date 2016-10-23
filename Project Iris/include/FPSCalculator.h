@@ -2,7 +2,7 @@
 
 #include "windows.h"
 
-class FaceTrackingFrameRateCalculator
+class FPSCalculator
 {
 private:
 	LARGE_INTEGER frequency;
@@ -13,7 +13,7 @@ private:
 	bool isFrameRateReady;
 
 public:
-	FaceTrackingFrameRateCalculator();
+	FPSCalculator();
 	bool IsFrameRateReady();
 	int GetFrameRate();
 	void Tick();
