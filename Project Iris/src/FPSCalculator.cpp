@@ -1,5 +1,11 @@
 #include "FPSCalculator.h"
 
+FPSCalculator::FPSCalculator() : frameRate(0), currentlyCalclatedFrameRate(0), currentTime(), isFrameRateReady(false)
+{
+	QueryPerformanceCounter(&previousTime);
+	QueryPerformanceFrequency(&frequency);
+}
+
 bool FPSCalculator::IsFrameRateReady()
 {
 	return isFrameRateReady;

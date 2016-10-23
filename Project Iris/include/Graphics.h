@@ -1,14 +1,14 @@
 #pragma once
 
 #include <memory>
-#include "FaceTrackingRenderer.h"
+#include "Renderer.h"
 #include "service/pxcsessionservice.h"
 
-class FaceTrackingRenderer3D : public FaceTrackingRenderer
+class Graphics : public Renderer
 {
 public:
-	FaceTrackingRenderer3D(HWND window, PXCSession* session);
-	virtual ~FaceTrackingRenderer3D();
+	Graphics(HWND window, PXCSession* session);
+	virtual ~Graphics();
 
 	void DrawBitmap(PXCCapture::Sample* sample);
 

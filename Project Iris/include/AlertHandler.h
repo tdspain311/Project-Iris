@@ -6,10 +6,7 @@
 class AlertHandler : public PXCFaceConfiguration::AlertHandler
 {
 public:
-	AlertHandler(HWND hwndDlg) : dialogWindow(hwndDlg)
-	{
-
-	}
+	AlertHandler(HWND hwndDlg);
 	virtual void PXCAPI OnFiredAlert(const PXCFaceData::AlertData *alertData);
 
 private:

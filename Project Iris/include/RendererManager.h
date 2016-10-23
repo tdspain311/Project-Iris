@@ -1,17 +1,16 @@
 #pragma once
 
-#include "FaceTrackingRenderer.h"
-#include "FaceTrackingRenderer2D.h"
-#include "FaceTrackingRenderer3D.h"
+#include "Renderer.h"
+#include "Graphics.h"
 
-class FaceTrackingRendererManager
+class RendererManager
 {
 public:
 	//FaceTrackingRendererManager(FaceTrackingRenderer2D* renderer2D, FaceTrackingRenderer3D* renderer3D);
-	FaceTrackingRendererManager(FaceTrackingRenderer3D* renderer3D);
-	~FaceTrackingRendererManager();
+	RendererManager(Graphics* renderer3D);
+	~RendererManager();
 
-	void SetRendererType(FaceTrackingRenderer::RendererType type);
+	void SetRendererType(Renderer::RendererType type);
 	void Render();
 	void SetSenseManager(PXCSenseManager* senseManager);
 	void SetNumberOfLandmarks(int numLandmarks);
@@ -25,8 +24,8 @@ public:
 
 private:
 	//FaceTrackingRenderer2D* m_renderer2D;
-	FaceTrackingRenderer3D* m_renderer3D;
-	FaceTrackingRenderer* m_currentRenderer;
+	Graphics* m_renderer3D;
+	Renderer* m_currentRenderer;
 
 	HANDLE m_rendererSignal;
 	OnFinishedRenderingCallback m_callback;

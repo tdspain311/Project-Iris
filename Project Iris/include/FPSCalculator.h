@@ -13,11 +13,7 @@ private:
 	bool isFrameRateReady;
 
 public:
-	FPSCalculator() : frameRate(0), currentlyCalclatedFrameRate(0), currentTime(), isFrameRateReady(false)
-	{
-		QueryPerformanceCounter(&previousTime);
-		QueryPerformanceFrequency(&frequency);
-	}
+	FPSCalculator();
 	bool IsFrameRateReady();
 	int GetFrameRate();
 	void Tick();

@@ -13,11 +13,10 @@
 #include "service/pxcsessionservice.h"
 
 #include "FPSCalculator.h"
-#include "FaceTrackingRendererManager.h"
-//#include "FaceTrackingRenderer2D.h"
-#include "FaceTrackingRenderer3D.h"
-#include "FaceTrackingUtilities.h"
-#include "FaceTrackingProcessor.h"
+#include "RendererManager.h"
+#include "Graphics.h"
+#include "Utilities.h"
+#include "Processor.h"
 #include "Strsafe.h"
 #include <string.h>
 #include <iostream>
@@ -26,8 +25,8 @@ WCHAR user_name[40];
 pxcCHAR calibFileName[1024] = { 0 };
 pxcCHAR rssdkFileName[1024] = { 0 };
 PXCSession* session = NULL;
-FaceTrackingRendererManager* renderer = NULL;
-FaceTrackingProcessor* processor = NULL;
+RendererManager* renderer = NULL;
+Processor* processor = NULL;
 
 HANDLE ghMutex = NULL;
 HWND ghWnd = NULL;
@@ -1063,7 +1062,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 					InitCalibWindows(mode_calib);
 
 					if (processor) delete processor;
-					processor = new FaceTrackingProcessor(dialogWindow);
+					processor = new Processor(dialogWindow);
 					CreateThread(0, 0, ProcessingThread, dialogWindow, 0, 0);
 
 					return TRUE;
@@ -1127,7 +1126,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 
 			if (processor) delete processor;
 
-			processor = new FaceTrackingProcessor(dialogWindow);
+			processor = new Processor(dialogWindow);
 			CreateThread(0, 0, ProcessingThread, dialogWindow, 0, 0);
 			
 			/*
@@ -1343,7 +1342,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
 	}
 	*/
 	
-	FaceTrackingRenderer3D* renderer3D = new FaceTrackingRenderer3D(dialogWindow, session);
+	Graphics* renderer3D = new Graphics(dialogWindow, session);
 	if(renderer3D == NULL)
 	{
 		MessageBoxW(0, L"Failed to create 3D renderer", L"Face Viewer", MB_ICONEXCLAMATION | MB_OK);
@@ -1351,7 +1350,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
 		return 1;
 	}
 	//renderer = new FaceTrackingRendererManager(renderer2D, renderer3D);
-	renderer = new FaceTrackingRendererManager(renderer3D);
+	renderer = new RendererManager(renderer3D);
 	if(renderer == NULL)
 	{
 		MessageBoxW(0, L"Failed to create renderer manager", L"Face Viewer", MB_ICONEXCLAMATION | MB_OK);
@@ -1382,7 +1381,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
 	*/
 	// Only need one renderer
 
-	renderer->SetRendererType(FaceTrackingRenderer::R3D);
+	renderer->SetRendererType(Graphics::R3D);
 
 	// Create Rendering thread
 	CreateThread(NULL, NULL, RenderingThread, NULL, NULL, NULL);

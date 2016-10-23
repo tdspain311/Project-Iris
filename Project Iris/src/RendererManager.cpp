@@ -1,4 +1,4 @@
-#include "FaceTrackingRendererManager.h"
+#include "RendererManager.h"
 
 extern HANDLE ghMutex;
 /*
@@ -8,13 +8,13 @@ FaceTrackingRendererManager::FaceTrackingRendererManager(FaceTrackingRenderer2D*
 	m_rendererSignal = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 */
-FaceTrackingRendererManager::FaceTrackingRendererManager(FaceTrackingRenderer3D* renderer3D) :
+RendererManager::RendererManager(Graphics* renderer3D) :
 	m_renderer3D(renderer3D), m_currentRenderer(NULL)
 {
 	m_rendererSignal = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
-FaceTrackingRendererManager::~FaceTrackingRendererManager(void)
+RendererManager::~RendererManager(void)
 {
 	CloseHandle(m_rendererSignal);
 	/*
@@ -25,7 +25,7 @@ FaceTrackingRendererManager::~FaceTrackingRendererManager(void)
 		delete m_renderer3D;
 }
 
-void FaceTrackingRendererManager::SetRendererType(FaceTrackingRenderer::RendererType type)
+void RendererManager::SetRendererType(Renderer::RendererType type)
 {
 	DWORD dwWaitResult;
 	dwWaitResult = WaitForSingleObject(ghMutex,	INFINITE);
@@ -51,7 +51,7 @@ void FaceTrackingRendererManager::SetRendererType(FaceTrackingRenderer::Renderer
 	}
 }
 
-void FaceTrackingRendererManager::Render()
+void RendererManager::Render()
 {
 	WaitForSingleObject(m_rendererSignal, INFINITE);
 
@@ -60,45 +60,45 @@ void FaceTrackingRendererManager::Render()
 	m_callback();
 }
 
-void FaceTrackingRendererManager::SetSenseManager(PXCSenseManager* senseManager)
+void RendererManager::SetSenseManager(PXCSenseManager* senseManager)
 {
 	//m_renderer2D->SetSenseManager(senseManager);
 	m_renderer3D->SetSenseManager(senseManager);
 }
 
-void FaceTrackingRendererManager::SetNumberOfLandmarks(int numLandmarks)
+void RendererManager::SetNumberOfLandmarks(int numLandmarks)
 {
 	//m_renderer2D->SetNumberOfLandmarks(numLandmarks);
 	m_renderer3D->SetNumberOfLandmarks(numLandmarks);
 }
 
-void FaceTrackingRendererManager::SetCallback(OnFinishedRenderingCallback callback)
+void RendererManager::SetCallback(OnFinishedRenderingCallback callback)
 {
 	m_callback = callback;
 }
 
-void FaceTrackingRendererManager::DrawBitmap(PXCCapture::Sample* sample)
+void RendererManager::DrawBitmap(PXCCapture::Sample* sample)
 {
 	m_currentRenderer->DrawBitmap(sample);
 }
 
-void FaceTrackingRendererManager::SetOutput(PXCFaceData* output)
+void RendererManager::SetOutput(PXCFaceData* output)
 {
 	//m_renderer2D->SetOutput(output);
 	m_renderer3D->SetOutput(output);
 }
 
-void FaceTrackingRendererManager::SignalRenderer()
+void RendererManager::SignalRenderer()
 {
 	SetEvent(m_rendererSignal);
 }
 
-void FaceTrackingRendererManager::SignalProcessor()
+void RendererManager::SignalProcessor()
 {
 	SetEvent(GetRenderingFinishedSignal());
 }
 
-HANDLE& FaceTrackingRendererManager::GetRenderingFinishedSignal()
+HANDLE& RendererManager::GetRenderingFinishedSignal()
 {
 	static HANDLE renderingFinishedSignal = CreateEvent(NULL, FALSE, TRUE, NULL);
 	return renderingFinishedSignal;

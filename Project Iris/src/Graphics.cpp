@@ -1,20 +1,22 @@
-#include "FaceTrackingRenderer3D.h"
-#include "FaceTrackingUtilities.h"
-#include "pxcprojection.h"
 #include <iostream>
+
+#include "pxcprojection.h"
+
+#include "Graphics.h"
+#include "Utilities.h"
 
 static BOOL DEBUG = FALSE;
 
 
-FaceTrackingRenderer3D::~FaceTrackingRenderer3D()
+Graphics::~Graphics()
 {
 }
 
-FaceTrackingRenderer3D::FaceTrackingRenderer3D(HWND window, PXCSession* session) : FaceTrackingRenderer(window), m_session(session)
+Graphics::Graphics(HWND window, PXCSession* session) : Renderer(window), m_session(session)
 {
 }
 
-bool FaceTrackingRenderer3D::ProjectVertex(const PXCPoint3DF32 &v, int &x, int &y, int radius)
+bool Graphics::ProjectVertex(const PXCPoint3DF32 &v, int &x, int &y, int radius)
 {
 	x = int (m_outputImageInfo.width * (0.5f + 0.001f * v.x));
 	y = int (m_outputImageInfo.height * (0.5f - 0.001f * v.y));
@@ -51,7 +53,7 @@ void FaceTrackingRenderer3D::CalcCenterOfMass(PXCFaceData::LandmarkPoint &center
 	centerOfMass.world.z /= numStartPointsTodevied;
 }
 */
-void FaceTrackingRenderer3D::DrawGraphics(PXCFaceData* faceOutput)
+void Graphics::DrawGraphics(PXCFaceData* faceOutput)
 {
 	assert(faceOutput != NULL);
 	if (!m_bitmap) return;
@@ -73,7 +75,7 @@ void FaceTrackingRenderer3D::DrawGraphics(PXCFaceData* faceOutput)
 	}
 }
 
-void FaceTrackingRenderer3D::DrawBitmap(PXCCapture::Sample* sample)
+void Graphics::DrawBitmap(PXCCapture::Sample* sample)
 {
 	PXCImage *imageDepth = sample->depth;
 	assert(imageDepth);
@@ -168,7 +170,7 @@ void FaceTrackingRenderer3D::DrawBitmap(PXCCapture::Sample* sample)
 	}
 }
 
-void FaceTrackingRenderer3D::DrawLandmark(PXCFaceData::Face* trackedFace)
+void Graphics::DrawLandmark(PXCFaceData::Face* trackedFace)
 {
 	const PXCFaceData::LandmarksData *landmarkData = trackedFace->QueryLandmarks();
 
@@ -352,7 +354,7 @@ void FaceTrackingRenderer3D::DrawLandmark(PXCFaceData::Face* trackedFace)
 	ReleaseDC(panelWindow, dc1);
 }
 
-void FaceTrackingRenderer3D::DrawPose(PXCFaceData::Face* trackedFace)
+void Graphics::DrawPose(PXCFaceData::Face* trackedFace)
 {
 	HWND panelWindow = GetDlgItem(m_window, IDC_PANEL);
 	HDC dc1 = GetDC(panelWindow);
