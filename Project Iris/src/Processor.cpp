@@ -21,9 +21,9 @@ extern volatile bool isStopped;
 extern volatile bool isActiveApp;
 extern volatile bool isLoadCalibFile;
 
-extern pxcCHAR calibFileName[1024];
-extern pxcCHAR rssdkFileName[1024];
-extern HANDLE ghMutex;
+extern pxcCHAR m_CalibFilename[1024];
+extern pxcCHAR m_rssdkFilename[1024];
+extern HANDLE g_hMutex;
 bool GetSaveCalibFile(void);
 
 // save the calibration buffer for later
@@ -115,11 +115,11 @@ void Processor::Process(HWND dialogWindow) {
 
 	if (Utilities::GetRecordState(dialogWindow)) { // we are recording
 
-		status = captureManager->SetFileName(rssdkFileName, true);
+		status = captureManager->SetFileName(m_rssdkFilename, true);
 
 	} else if (Utilities::GetPlaybackState(dialogWindow)) { // we are playing
 
-		status = captureManager->SetFileName(rssdkFileName, false);
+		status = captureManager->SetFileName(m_rssdkFilename, false);
 		senseManager->QueryCaptureManager()->SetRealtime(true);
 
 	}
@@ -178,7 +178,7 @@ void Processor::Process(HWND dialogWindow) {
 
 	if (isLoadCalibFile) {
 
-		FILE* my_file = _wfopen(calibFileName, L"rb");
+		FILE* my_file = _wfopen(m_CalibFilename, L"rb");
 
 		if (my_file) {
 
@@ -320,7 +320,7 @@ void Processor::Process(HWND dialogWindow) {
             if (sample != NULL) {
 
 				DWORD dwWaitResult;
-				dwWaitResult = WaitForSingleObject(ghMutex,	INFINITE);
+				dwWaitResult = WaitForSingleObject(g_hMutex,	INFINITE);
 				
 				if (dwWaitResult == WAIT_OBJECT_0) {
 
@@ -428,7 +428,7 @@ void Processor::Process(HWND dialogWindow) {
 					renderer->SetOutput(m_output);
 					renderer->SignalRenderer();
 
-					if (!ReleaseMutex(ghMutex)) {
+					if (!ReleaseMutex(g_hMutex)) {
 						
 						throw std::exception("Failed to release mutex");
 						return;

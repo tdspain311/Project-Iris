@@ -21,18 +21,18 @@
 #include <string.h>
 #include <iostream>
 
-WCHAR user_name[40];
-pxcCHAR calibFileName[1024] = { 0 };
-pxcCHAR rssdkFileName[1024] = { 0 };
+WCHAR m_Username[40];
+pxcCHAR m_CalibFilename[1024] = { 0 };
+pxcCHAR m_rssdkFilename[1024] = { 0 };
 PXCSession* session = NULL;
 RendererManager* renderer = NULL;
 Processor* processor = NULL;
 
-HANDLE ghMutex = NULL;
-HWND ghWnd = NULL;
-HWND ghWndEyeBack = NULL;
-HWND ghWndEyePoint = NULL;
-HINSTANCE ghInstance = NULL;
+HANDLE g_hMutex = NULL;
+HWND g_hWnd = NULL;
+HWND g_hWndEyeBack = NULL;
+HWND g_hWndEyePoint = NULL;
+HINSTANCE g_hInstance = NULL;
 
 volatile bool isRunning = false;
 volatile bool isStopped = false;
@@ -62,8 +62,9 @@ static make_layered set_layered_window = NULL;
 static BOOL dll_initialized = FALSE;
 
 static BOOL DEBUG = TRUE;
+static int MAX_ANGLE = 40;
 
-bool make_transparent(HWND hWnd) {
+bool make_transparent(HWND hWnd_) {
 
 	if (!dll_initialized) {
 
@@ -76,25 +77,25 @@ bool make_transparent(HWND hWnd) {
 	if (set_layered_window == NULL) return FALSE;
 	SetLastError(0);
 
-	SetWindowLong(hWnd, GWL_EXSTYLE , GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+	SetWindowLong(hWnd_, GWL_EXSTYLE , GetWindowLong(hWnd_, GWL_EXSTYLE) | WS_EX_LAYERED);
 	if (GetLastError()) return FALSE;
 
-	return set_layered_window(hWnd, RGB(0,0,0), 127, LWA_COLORKEY|LWA_ALPHA) != NULL;
+	return set_layered_window(hWnd_, RGB(0,0,0), 127, LWA_COLORKEY|LWA_ALPHA) != NULL;
 
 }
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK WndProc(HWND hWnd_, UINT message_, WPARAM wParam_, LPARAM lParam_) {
 
-	switch (message)
+	switch (message_)
 	{
 
 	case WM_KEYDOWN: // exit calibration
 
-		switch (wParam) {
+		switch (wParam_) {
 
 		case VK_ESCAPE:
-			PostMessage(ghWnd, WM_COMMAND, ID_STOP, 0);
-			CloseWindow(hWnd);
+			PostMessage(g_hWnd, WM_COMMAND, ID_STOP, 0);
+			CloseWindow(hWnd_);
 			break;
 
 		}
@@ -103,12 +104,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
 	// default message handling
 
-	if (message) return DefWindowProc(hWnd, message, wParam, lParam);
+	if (message_) return DefWindowProc(hWnd_, message_, wParam_, lParam_);
 	else return 0;
 
 }
 
-ATOM MyRegisterClass(HINSTANCE hInstance, DWORD color, WCHAR* name) {
+ATOM MyRegisterClass(HINSTANCE hInstance_, DWORD color_, WCHAR* name_) {
 
 	WNDCLASSEX wcex;
 
@@ -118,105 +119,105 @@ ATOM MyRegisterClass(HINSTANCE hInstance, DWORD color, WCHAR* name) {
 	wcex.lpfnWndProc	= WndProc;
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
-	wcex.hInstance		= hInstance;
+	wcex.hInstance		= hInstance_;
 	wcex.hIcon			= NULL;
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground	= (HBRUSH)CreateSolidBrush(color);
+	wcex.hbrBackground	= (HBRUSH)CreateSolidBrush(color_);
 	wcex.lpszMenuName	= NULL;
-	wcex.lpszClassName	= name;
+	wcex.lpszClassName	= name_;
 	wcex.hIconSm		= NULL;
 
 	return RegisterClassEx(&wcex);
 
 }
 
-bool InitSimpleWindow(HWND* hwnd, int size, DWORD color, WCHAR* name) {
+bool InitSimpleWindow(HWND* hwnd_, int size_, DWORD color_, WCHAR* name_) {
 
-	if (hwnd == NULL) return false;
+	if (hwnd_ == NULL) return false;
 
 	// create transparent eye point window
 
-	if (*hwnd == NULL) {
+	if (*hwnd_ == NULL) {
 
-		MyRegisterClass(ghInstance, color, name);
+		MyRegisterClass(g_hInstance, color_, name_);
 
-		*hwnd = CreateWindow(name, name, WS_POPUP,
-			-500, -500, size, size, ghWndEyeBack, NULL, ghInstance, NULL);
+		*hwnd_ = CreateWindow(name_, name_, WS_POPUP,
+			-500, -500, size_, size_, g_hWndEyeBack, NULL, g_hInstance, NULL);
 
-		if (!hwnd) return false;
+		if (!hwnd_) return false;
 
 	}
 
-	ShowWindow(*hwnd, SW_SHOW);
-	UpdateWindow(*hwnd);
+	ShowWindow(*hwnd_, SW_SHOW);
+	UpdateWindow(*hwnd_);
 
 	return true;
 
 }
 
-bool InitTransWindow(HWND* hwnd, int size, DWORD color, WCHAR* name) {
+bool InitTransWindow(HWND* hwnd_, int size_, DWORD color_, WCHAR* name_) {
 
-	if (hwnd == NULL) return false;
+	if (hwnd_ == NULL) return false;
 
 	// create transparent eye point window
 
-	if (*hwnd == NULL) {
+	if (*hwnd_ == NULL) {
 
-		MyRegisterClass(ghInstance, color, name);
+		MyRegisterClass(g_hInstance, color_, name_);
 
-		*hwnd = CreateWindow(name, name, WS_POPUP,
-			-500, -500, size, size, ghWndEyeBack, NULL, ghInstance, NULL);
+		*hwnd_ = CreateWindow(name_, name_, WS_POPUP,
+			-500, -500, size_, size_, g_hWndEyeBack, NULL, g_hInstance, NULL);
 
-		if (!hwnd) return false;
+		if (!hwnd_) return false;
 
 	}
 
-	make_transparent(*hwnd);
-	ShowWindow(*hwnd, SW_SHOW);
-	UpdateWindow(*hwnd);
+	make_transparent(*hwnd_);
+	ShowWindow(*hwnd_, SW_SHOW);
+	UpdateWindow(*hwnd_);
 
 	return true;
 
 }
 
-bool InitBackWindow(HWND* hwnd, DWORD color, WCHAR* name) {
+bool InitBackWindow(HWND* hwnd_, DWORD color_, WCHAR* name_) {
 
-	if (hwnd == NULL) return false;
+	if (hwnd_ == NULL) return false;
 
 	// create transparent eye point window
 
-	if (*hwnd == NULL) {
+	if (*hwnd_ == NULL) {
 
-		MyRegisterClass(ghInstance, color, name);
+		MyRegisterClass(g_hInstance, color_, name_);
 
 		RECT rc;
 		const HWND hDesktop = GetDesktopWindow();
 		GetWindowRect(hDesktop, &rc);
 
-		*hwnd = CreateWindow(name, name, WS_POPUP,
-			0, 0, rc.right, rc.bottom, ghWnd, NULL, ghInstance, NULL);
+		*hwnd_ = CreateWindow(name_, name_, WS_POPUP,
+			0, 0, rc.right, rc.bottom, g_hWnd, NULL, g_hInstance, NULL);
 
-		if (!hwnd) return false;
+		if (!hwnd_) return false;
 
 	}
 
 	// hide back window at first enable when API loaded
 
-	ShowWindow(*hwnd, SW_HIDE);
-	UpdateWindow(*hwnd);
+	ShowWindow(*hwnd_, SW_HIDE);
+	UpdateWindow(*hwnd_);
 
 	return true;
 
 }
 
-void CloseTransWindow(HWND* hwnd) {
+void CloseTransWindow(HWND* hwnd_) {
 
 	// close EyePoint window
 
-	if (*hwnd) {
+	if (*hwnd_) {
 
-		DestroyWindow(*hwnd);
-		*hwnd = NULL;
+		DestroyWindow(*hwnd_);
+		*hwnd_ = NULL;
 
 	}
 
@@ -226,8 +227,8 @@ void CloseCalibWindows() {
 
 	// close calibration windows
 
-	CloseTransWindow(&ghWndEyeBack);
-	CloseTransWindow(&ghWndEyePoint);
+	CloseTransWindow(&g_hWndEyeBack);
+	CloseTransWindow(&g_hWndEyePoint);
 
 }
 
@@ -235,17 +236,17 @@ void EnableBackWindow() {
 
 	// show message box as latest point
 
-	MessageBoxA(ghWnd, "Calibration is required, please keep your head fixed and look at the red square that appears on the screen",
+	MessageBoxA(g_hWnd, "Calibration is required, please keep your head fixed and look at the red square that appears on the screen",
 		"Calibration Required", MB_OK | MB_ICONINFORMATION);
 
 	// enable back window
 	
-	ShowWindow(ghWndEyeBack, SW_SHOW);
-	UpdateWindow(ghWndEyeBack);
+	ShowWindow(g_hWndEyeBack, SW_SHOW);
+	UpdateWindow(g_hWndEyeBack);
 
 }
 
-void InitCalibWindows(CalibMode mode) {
+void InitCalibWindows(CalibMode mode_) {
 
 	// close the old windows
 
@@ -253,31 +254,31 @@ void InitCalibWindows(CalibMode mode) {
 
 	// init calibration windows
 
-	modeWork = mode; 
-	switch (mode) {
+	modeWork = mode_; 
+	switch (mode_) {
 
 	case mode_calib:
-		InitBackWindow(&ghWndEyeBack, RGB(240, 240, 240), L"Background");
-		InitSimpleWindow(&ghWndEyePoint, 35, RGB(0, 0, 255), L"GPI Calibrate");  // 35-50
+		InitBackWindow(&g_hWndEyeBack, RGB(240, 240, 240), L"Background");
+		InitSimpleWindow(&g_hWndEyePoint, 35, RGB(0, 0, 255), L"GPI Calibrate");  // 35-50
 		break;
 
 	case mode_live:
-		InitTransWindow(&ghWndEyePoint, 30, RGB(0, 255, 255), L"GPI Live");
+		InitTransWindow(&g_hWndEyePoint, 30, RGB(0, 255, 255), L"GPI Live");
 		break;
 
 	case mode_playback:
-		InitTransWindow(&ghWndEyePoint, 30, RGB(255, 255, 0), L"GPI Clip");
+		InitTransWindow(&g_hWndEyePoint, 30, RGB(255, 255, 0), L"GPI Clip");
 		break;
-
+	/*
 	case mode_record:
-		InitSimpleWindow(&ghWndEyePoint, 35, RGB(255, 0, 0), L"GPI Record");
+		InitSimpleWindow(&g_hWndEyePoint, 35, RGB(255, 0, 0), L"GPI Record");
 		break;
-
+	*/
 	}
 
 	// focus on main window
 	
-	SetFocus(ghWnd);
+	SetFocus(g_hWnd);
 
 }
 
@@ -285,10 +286,10 @@ void UpdateTracking() {
 
 	// set position of gaze point
 
-	if (ghWndEyePoint) {
+	if (g_hWndEyePoint) {
 
 		RECT rc;
-		GetWindowRect(ghWndEyePoint, &rc);
+		GetWindowRect(g_hWndEyePoint, &rc);
 
 		int width = rc.right - rc.left;
 		int height = rc.bottom - rc.top;
@@ -297,8 +298,8 @@ void UpdateTracking() {
 
 			POINT cursorPos;
 			GetCursorPos(&cursorPos);
-			SetWindowPos(ghWndEyePoint, NULL, cursorPos.x - width/2, cursorPos.y - height/2, width, height, NULL);
-
+			SetWindowPos(g_hWndEyePoint, NULL, cursorPos.x - width/2, cursorPos.y - height/2, width, height, NULL);
+		
 		} else {
 
 			// Gaze position
@@ -363,17 +364,17 @@ void GetPlaybackFile(void) {
 
 	filename.lStructSize = sizeof(filename);
 	filename.lpstrFilter = L"RSSDK clip (*.rssdk)\0*.rssdk\0Old format clip (*.pcsdk)\0*.pcsdk\0All Files (*.*)\0*.*\0\0";
-	filename.lpstrFile = rssdkFileName; 
-	rssdkFileName[0] = 0;
-	filename.nMaxFile = sizeof(rssdkFileName) / sizeof(pxcCHAR);
+	filename.lpstrFile = m_rssdkFilename; 
+	m_rssdkFilename[0] = 0;
+	filename.nMaxFile = sizeof(m_rssdkFilename) / sizeof(pxcCHAR);
 	filename.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
-	if (!GetOpenFileName(&filename)) rssdkFileName[0] = 0;
+	if (!GetOpenFileName(&filename)) m_rssdkFilename[0] = 0;
 
 }
 
-BOOL CALLBACK LoadCalibProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+BOOL CALLBACK LoadCalibProc(HWND hwndDlg_, UINT message_, WPARAM wParam_, LPARAM lParam_) {
 
-    switch (message) { 
+    switch (message_) { 
 
 		case WM_INITDIALOG:
 
@@ -405,7 +406,7 @@ BOOL CALLBACK LoadCalibProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lP
 
         case WM_COMMAND: 
 
-            switch (LOWORD(wParam)) { 
+            switch (LOWORD(wParam_)) { 
 
             case IDOK:			
 				{
@@ -415,15 +416,15 @@ BOOL CALLBACK LoadCalibProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lP
 					SendMessage(GetDlgItem(hwndDlg, IDC_LIST1), LB_GETTEXT, (WPARAM)index , (LPARAM)name);
 					GetTempPath(max_path_length, temp);
 					
-					StringCbPrintf(calibFileName, sizeof(calibFileName), L"%s%s", temp, name);
-					EndDialog(hwndDlg, true);
+					StringCbPrintf(m_CalibFilename, sizeof(m_CalibFilename), L"%s%s", temp, name);
+					EndDialog(hwndDlg_, true);
 					return TRUE; 
 				}
 
 			case IDCANCEL:
 			case IDCLOSE:
-				calibFileName[0] = 0;
-                EndDialog(hwndDlg, false); 
+				m_CalibFilename[0] = 0;
+                EndDialog(hwndDlg_, false); 
                 return TRUE; 
 
         } 
@@ -440,7 +441,7 @@ bool GetCalibFile(void) {
 
 	// use a special dialog
 
-	return (DialogBox(ghInstance, MAKEINTRESOURCE(IDD_LOAD_CALIB), ghWnd, (DLGPROC)LoadCalibProc)) != 0;
+	return (DialogBox(g_hInstance, MAKEINTRESOURCE(IDD_LOAD_CALIB), g_hWnd, (DLGPROC)LoadCalibProc)) != 0;
 
 	// sorry we can't use common dialog because it ignores directory selection
 	/*
@@ -450,18 +451,18 @@ bool GetCalibFile(void) {
 	WCHAR temp[max_path_length];
 	GetTempPath(max_path_length, temp);
 
-	StringCbPrintf(calibFileName, max_path_length, L"%sdefault_user.bin", temp);
+	StringCbPrintf(m_CalibFilename, max_path_length, L"%sdefault_user.bin", temp);
 
 	filename.lpstrInitialDir = temp;
 	filename.lStructSize = sizeof(filename);
 	filename.lpstrFilter = L"Calibration File (*.bin)\0*.bin\0All Files (*.*)\0*.*\0\0";
-	filename.lpstrFile = calibFileName; 
-	filename.nMaxFile = sizeof(calibFileName) / sizeof(pxcCHAR);
+	filename.lpstrFile = m_CalibFilename; 
+	filename.nMaxFile = sizeof(m_CalibFilename) / sizeof(pxcCHAR);
 	filename.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
 
 	if (GetOpenFileName(&filename)) return true;
 
-	calibFileName[0] = 0;
+	m_CalibFilename[0] = 0;
 	return false;
 */
 }
@@ -473,14 +474,14 @@ bool GetSaveCalibFile(void) {
 
 	filename.lStructSize = sizeof(filename);
 	filename.lpstrFilter = L"Calibration File (*.bin)\0*.bin\0All Files (*.*)\0*.*\0\0";
-	filename.lpstrFile = calibFileName; 
-	calibFileName[0] = 0;
-	filename.nMaxFile = sizeof(calibFileName) / sizeof(pxcCHAR);
+	filename.lpstrFile = m_CalibFilename; 
+	m_CalibFilename[0] = 0;
+	filename.nMaxFile = sizeof(m_CalibFilename) / sizeof(pxcCHAR);
 	filename.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST;
 
 	if (GetSaveFileName(&filename)) return true;
 
-	calibFileName[0] = 0;
+	m_CalibFilename[0] = 0;
 	return false;
 
 }
@@ -492,26 +493,26 @@ void GetRecordFile(void) {
 
 	filename.lStructSize = sizeof(filename);
 	filename.lpstrFilter = L"RSSDK clip (*.rssdk)\0*.rssdk\0All Files (*.*)\0*.*\0\0";
-	filename.lpstrFile = rssdkFileName; 
-	rssdkFileName[0] = 0;
-	filename.nMaxFile = sizeof(rssdkFileName) / sizeof(pxcCHAR);
+	filename.lpstrFile = m_rssdkFilename; 
+	m_rssdkFilename[0] = 0;
+	filename.nMaxFile = sizeof(m_rssdkFilename) / sizeof(pxcCHAR);
 	filename.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST;
 
 	if (GetSaveFileName(&filename)) {
 
 		if (filename.nFilterIndex==1 && filename.nFileExtension==0) {
 
-			int len = std::char_traits<wchar_t>::length(rssdkFileName);
+			int len = std::char_traits<wchar_t>::length(m_rssdkFilename);
 			
-			if (len>1 && len<sizeof(rssdkFileName)/sizeof(pxcCHAR)-7) {
+			if (len>1 && len<sizeof(m_rssdkFilename)/sizeof(pxcCHAR)-7) {
 
-				wcscpy_s(&rssdkFileName[len], rsize_t(7), L".rssdk\0");
+				wcscpy_s(&m_rssdkFilename[len], rsize_t(7), L".rssdk\0");
 
 			}
 
 		}
 
-	} else rssdkFileName[0] = 0;
+	} else m_rssdkFilename[0] = 0;
 
 }
 
@@ -614,27 +615,27 @@ void PopulateProfile(HWND dialogWindow)
 }
 */
 
-void SaveLayout(HWND dialogWindow) {
+void SaveLayout(HWND dialogWindow_) {
 
-	GetClientRect(dialogWindow, &layout[0]);
-	ClientToScreen(dialogWindow, (LPPOINT)&layout[0].left);
-	ClientToScreen(dialogWindow, (LPPOINT)&layout[0].right);
-	GetWindowRect(GetDlgItem(dialogWindow, IDC_PANEL), &layout[1]);
-	GetWindowRect(GetDlgItem(dialogWindow, IDC_STATUS), &layout[2]);
+	GetClientRect(dialogWindow_, &layout[0]);
+	ClientToScreen(dialogWindow_, (LPPOINT)&layout[0].left);
+	ClientToScreen(dialogWindow_, (LPPOINT)&layout[0].right);
+	GetWindowRect(GetDlgItem(dialogWindow_, IDC_PANEL), &layout[1]);
+	GetWindowRect(GetDlgItem(dialogWindow_, IDC_STATUS), &layout[2]);
 
 	for (int i = 0; i < sizeof(controls) / sizeof(controls[0]); ++i)
-		GetWindowRect(GetDlgItem(dialogWindow, controls[i]), &layout[3 + i]);
+		GetWindowRect(GetDlgItem(dialogWindow_, controls[i]), &layout[3 + i]);
 
 }
 
-void RedoLayout(HWND dialogWindow) {
+void RedoLayout(HWND dialogWindow_) {
 
 	RECT rectangle;
-	GetClientRect(dialogWindow, &rectangle);
+	GetClientRect(dialogWindow_, &rectangle);
 
 	/* Status */
 
-	SetWindowPos(GetDlgItem(dialogWindow, IDC_STATUS), dialogWindow, 
+	SetWindowPos(GetDlgItem(dialogWindow_, IDC_STATUS), dialogWindow_, 
 		0,
 		rectangle.bottom - (layout[2].bottom - layout[2].top),
 		rectangle.right - rectangle.left,
@@ -644,7 +645,7 @@ void RedoLayout(HWND dialogWindow) {
 	/* Panel */
 
 	SetWindowPos(
-		GetDlgItem(dialogWindow,IDC_PANEL), dialogWindow,
+		GetDlgItem(dialogWindow_,IDC_PANEL), dialogWindow_,
 		(layout[1].left - layout[0].left),
 		(layout[1].top - layout[0].top),
 		rectangle.right - (layout[1].left-layout[0].left) - (layout[0].right - layout[1].right),
@@ -652,22 +653,22 @@ void RedoLayout(HWND dialogWindow) {
 		SWP_NOZORDER);
 
 	/* Buttons & CheckBoxes */
-
+	/*
 	for (int i = 0; i < sizeof(controls) / sizeof(controls[0]); ++i) {
 
 		SetWindowPos(
-			GetDlgItem(dialogWindow,controls[i]), dialogWindow,
+			GetDlgItem(dialogWindow_,controls[i]), dialogWindow_,
 			rectangle.right - (layout[0].right - layout[3 + i].left),
 			(layout[3 + i].top - layout[0].top),
 			(layout[3 + i].right - layout[3 + i].left),
 			(layout[3 + i].bottom - layout[3 + i].top),
 			SWP_NOZORDER);
-
-	}
+	
+	}*/
 
 }
 
-static DWORD WINAPI RenderingThread(LPVOID arg) {
+static DWORD WINAPI RenderingThread(LPVOID arg_) {
 
 	while (true) {
 
@@ -683,9 +684,9 @@ static DWORD WINAPI RenderingThread(LPVOID arg) {
 
 }
 
-static DWORD WINAPI ProcessingThread(LPVOID arg) {
+static DWORD WINAPI ProcessingThread(LPVOID arg_) {
 
-	HWND window = (HWND)arg;
+	HWND window = (HWND)arg_;
 	processor->Process(window);
 
 	isRunning = false;
@@ -712,13 +713,13 @@ void DisableUnsupportedAlgos(HWND dialogWindow, bool isDisabled) {
 }
 */
 
-BOOL CALLBACK ResultsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+BOOL CALLBACK ResultsProc(HWND hwndDlg_, UINT message_, WPARAM wParam_, LPARAM lParam_) {
 
-    switch (message) { 
+    switch (message_) { 
 
 	   case WM_KEYDOWN: // exit calibration
 
-		switch (wParam) {
+		switch (wParam_) {
 
 		case VK_ESCAPE:
 
@@ -728,13 +729,13 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPar
 				calibBuffer = NULL;
 				calibBuffersize = 0;
 				isLoadCalibFile = false;
-				EndDialog(hwndDlg, wParam);
-				PostMessage(ghWnd, WM_COMMAND, ID_STOP, 0);
+				EndDialog(hwndDlg_, wParam_);
+				PostMessage(g_hWnd, WM_COMMAND, ID_STOP, 0);
 
 			} else { // continue working
 
-				if (!GetDlgItemText(hwndDlg, IDC_EDIT1, user_name, 40))	wsprintf(user_name, L"default_user");
-				EndDialog(hwndDlg, wParam); 
+				if (!GetDlgItemText(hwndDlg_, IDC_EDIT, m_Username, 40))	wsprintf(m_Username, L"default_user");
+				EndDialog(hwndDlg_, wParam_); 
 
 			}
 
@@ -744,21 +745,21 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPar
 
 		case WM_INITDIALOG:
 			
-			wsprintf(user_name, L"default_user");
 			SetDlgItemText(hwndDlg, IDC_EDIT1, user_name);
+			wsprintf(m_Username, L"default_user");
 			
 			if (!calibBuffer) {
 
 				Edit_Enable(GetDlgItem(hwndDlg, IDC_EDIT1), false);
-				Button_Enable(GetDlgItem(hwndDlg, ID_DETAILS) , false);
-				Button_Enable(GetDlgItem(hwndDlg, ID_OK) , false);
+				Button_Enable(GetDlgItem(hwndDlg_, ID_DETAILS) , false);
+				Button_Enable(GetDlgItem(hwndDlg_, ID_OK) , false);
 				//SetDlgItemText(hwndDlg, ID_OK, L"Close");
 
 			} else {
 
-				Edit_Enable(GetDlgItem(hwndDlg, IDD_CALIB_DIALOG), true);
-				Button_Enable(GetDlgItem(hwndDlg, ID_DETAILS) , true);
-				Button_Enable(GetDlgItem(hwndDlg, ID_OK) , true);
+				Edit_Enable(GetDlgItem(hwndDlg_, IDD_CALIB_DIALOG), true);
+				Button_Enable(GetDlgItem(hwndDlg_, ID_DETAILS) , true);
+				Button_Enable(GetDlgItem(hwndDlg_, ID_OK) , true);
 				//SetDlgItemText(hwndDlg, ID_OK, L"Ok");
 
 			}
@@ -768,23 +769,23 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPar
 			switch (calib_status) {
 
 			case 0:
-				SetDlgItemText(hwndDlg, IDC_RESULTS, L"Calibration Status: SUCCESS");
+				SetDlgItemText(hwndDlg_, IDC_RESULTS, L"Calibration Status: SUCCESS");
 				break;
 
 			case 1:
-				SetDlgItemText(hwndDlg, IDC_RESULTS, L"Calibration Status: FAIR");
+				SetDlgItemText(hwndDlg_, IDC_RESULTS, L"Calibration Status: FAIR");
 				break;
 
 			case 2:
-				SetDlgItemText(hwndDlg, IDC_RESULTS, L"Calibration Status: POOR");
+				SetDlgItemText(hwndDlg_, IDC_RESULTS, L"Calibration Status: POOR");
 				break;
 
 			case 3:
-				SetDlgItemText(hwndDlg, IDC_RESULTS, L"Calibration Status: FAILED");
+				SetDlgItemText(hwndDlg_, IDC_RESULTS, L"Calibration Status: FAILED");
 				break;
 
 			default:
-				SetDlgItemText(hwndDlg, IDC_RESULTS, L"Calibration Status: UNKNOWN");
+				SetDlgItemText(hwndDlg_, IDC_RESULTS, L"Calibration Status: UNKNOWN");
 				break;
 
 			}
@@ -815,7 +816,7 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPar
 
         case WM_COMMAND: 
 
-            switch (LOWORD(wParam)) { 
+            switch (LOWORD(wParam_)) { 
 
             case ID_OK: 
 
@@ -825,13 +826,13 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPar
 					calibBuffer = NULL;
 					calibBuffersize = 0;
 					isLoadCalibFile = false;
-					EndDialog(hwndDlg, wParam);
-					PostMessage(ghWnd, WM_COMMAND, ID_STOP, 0);
+					EndDialog(hwndDlg_, wParam_);
+					PostMessage(g_hWnd, WM_COMMAND, ID_STOP, 0);
 
 				} else { // continue working
 
 					if (!GetDlgItemText(hwndDlg, IDC_EDIT1, user_name, 40))	wsprintf(user_name, L"default_user");
-					EndDialog(hwndDlg, wParam); 
+					EndDialog(hwndDlg_, wParam_); 
 
 				}
 
@@ -843,7 +844,7 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPar
 				calibBuffer = NULL;
 				calibBuffersize = 0;
 				isLoadCalibFile = false;
-                EndDialog(hwndDlg, 0);
+                EndDialog(hwndDlg_, 0);
                 return TRUE; 
 
             case ID_DETAILS: //TODO: Implement this
@@ -859,12 +860,12 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPar
 					calibBuffer = NULL;
 					calibBuffersize = 0;
 					isLoadCalibFile = false;
-					EndDialog(hwndDlg, wParam);
-					PostMessage(ghWnd, WM_COMMAND, ID_STOP, 0);
+					EndDialog(hwndDlg_, wParam_);
+					PostMessage(g_hWnd, WM_COMMAND, ID_STOP, 0);
 
 				}
 
-                EndDialog(hwndDlg, wParam); 
+                EndDialog(hwndDlg_, wParam_); 
                 return TRUE; 
 
         } 
@@ -877,13 +878,13 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPar
 
 } 
 
-INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wParam, LPARAM lParam) { 
+INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wParam_, LPARAM lParam_) { 
 
-	HMENU menu1 = GetMenu(dialogWindow);
-	HMENU menu2;
+	HMENU menu1 = GetMenu(dialogWindow_);
+	//HMENU menu2;
 	//pxcCHAR* deviceName;
 
-	switch (message) {
+	switch (message_) {
 
 	case WM_INITDIALOG:
 
@@ -970,7 +971,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 
 		}
 		*/
-		switch (LOWORD(wParam)) {
+		switch (LOWORD(wParam_)) {
 
 		case IDCANCEL:
 
@@ -978,11 +979,11 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 
 			if (isRunning) {
 
-				PostMessage(dialogWindow, WM_COMMAND, IDCANCEL, 0);
+				PostMessage(dialogWindow_, WM_COMMAND, IDCANCEL, 0);
 
 			} else {
 
-				DestroyWindow(dialogWindow); 
+				DestroyWindow(dialogWindow_); 
 				PostQuitMessage(0);
 
 			}
@@ -1002,7 +1003,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 
 			if (calib_status == LOAD_CALIBRATION_ERROR) {
 
-				MessageBoxA(ghWnd, "Load calibration failed, data invalid", "Calibration Load status ", MB_OK | MB_ICONINFORMATION);
+				MessageBoxA(g_hWnd, "Load calibration failed, data invalid", "Calibration Load status ", MB_OK | MB_ICONINFORMATION);
 				InitCalibWindows(mode_calib);
 				isPaused = false;
 				break;
@@ -1011,17 +1012,17 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 	
 			if (calib_status == 3) {
 
-				MessageBoxA(ghWnd, "Please repeat while being in front of the camera and observing the points.",
+				MessageBoxA(g_hWnd, "Please repeat while being in front of the camera and observing the points.",
 					"Calibration Required", MB_OK | MB_ICONINFORMATION);
 
 				calibBuffer = NULL;
 				calibBuffersize = 0;
 				isLoadCalibFile = false;
-				PostMessage(ghWnd, WM_COMMAND, ID_STOP, 0);
+				PostMessage(g_hWnd, WM_COMMAND, ID_STOP, 0);
 
 			} else {
 
-				if (DialogBox(ghInstance, MAKEINTRESOURCE(IDD_CALIB_DIALOG), ghWnd, (DLGPROC)ResultsProc)) {
+				if (DialogBox(g_hInstance, MAKEINTRESOURCE(IDD_CALIB_DIALOG), g_hWnd, (DLGPROC)ResultsProc)) {
 
 					if (calibBuffer) {
 
@@ -1031,7 +1032,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 						WCHAR buff[max_path_length];
 
 						GetTempPath(max_path_length, temp);
-						wsprintf(buff, L"%s%s.bin", temp, user_name);
+						wsprintf(buff, L"%s%s.bin", temp, m_Username);
 
 						FILE* my_file = _wfopen(buff, L"wb");
 
@@ -1062,8 +1063,8 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 					InitCalibWindows(mode_calib);
 
 					if (processor) delete processor;
-					processor = new Processor(dialogWindow);
-					CreateThread(0, 0, ProcessingThread, dialogWindow, 0, 0);
+					processor = new Processor(dialogWindow_);
+					CreateThread(0, 0, ProcessingThread, dialogWindow_, 0, 0);
 
 					return TRUE;
 
@@ -1076,7 +1077,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 
 		case ID_LOAD_CALIB: // load calibration file or force a new one
 			isLoadCalibFile = GetCalibFile();
-			Button_Enable(GetDlgItem(dialogWindow, ID_START), calibFileName[0] != 0);
+			Button_Enable(GetDlgItem(dialogWindow_, ID_START), m_CalibFilename[0] != 0);
 			break;
 
 		case ID_NEW_CALIB: // start new calibration
@@ -1088,10 +1089,10 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 
 		case ID_START:
 
-			Button_Enable(GetDlgItem(dialogWindow, ID_LOAD_CALIB), false);
-			Button_Enable(GetDlgItem(dialogWindow, ID_NEW_CALIB), false);
-			Button_Enable(GetDlgItem(dialogWindow, ID_START), false);
-			Button_Enable(GetDlgItem(dialogWindow, ID_STOP), true);
+			Button_Enable(GetDlgItem(dialogWindow_, ID_LOAD_CALIB), false);
+			Button_Enable(GetDlgItem(dialogWindow_, ID_NEW_CALIB), false);
+			Button_Enable(GetDlgItem(dialogWindow_, ID_START), false);
+			Button_Enable(GetDlgItem(dialogWindow_, ID_STOP), true);
 
 			//dominant_eye = SendMessage(GetDlgItem(dialogWindow, IDC_LIST1), LB_GETCURSEL, (WPARAM)0 , (LPARAM)0);
 
@@ -1099,7 +1100,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 			for (int i = 0;i < GetMenuItemCount(menu1); ++i)
 				EnableMenuItem(menu1, i, MF_BYPOSITION | MF_GRAYED);
 			
-			DrawMenuBar(dialogWindow);
+			DrawMenuBar(dialogWindow_);
 
 			isStopped = false;
 			isRunning = true;
@@ -1109,12 +1110,10 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 			if (isLoadCalibFile == false && calibBuffersize == 0) {
 
 				InitCalibWindows(mode_calib);
-
-			} else if (GetMenuState(GetMenu(dialogWindow), ID_MODE_RECORD, MF_BYCOMMAND) & MF_CHECKED) {
+			} else if (GetMenuState(GetMenu(dialogWindow_), ID_MODE_RECORD, MF_BYCOMMAND) & MF_CHECKED) {
 
 				InitCalibWindows(mode_record);
-
-			} else if (GetMenuState(GetMenu(dialogWindow), ID_MODE_PLAYBACK, MF_BYCOMMAND) & MF_CHECKED) {
+			} else if (GetMenuState(GetMenu(dialogWindow_), ID_MODE_PLAYBACK, MF_BYCOMMAND) & MF_CHECKED) {
 
 				InitCalibWindows(mode_playback);
 
@@ -1126,8 +1125,8 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 
 			if (processor) delete processor;
 
-			processor = new Processor(dialogWindow);
-			CreateThread(0, 0, ProcessingThread, dialogWindow, 0, 0);
+			processor = new Processor(dialogWindow_);
+			CreateThread(0, 0, ProcessingThread, dialogWindow_, 0, 0);
 			
 			/*
 			Button_Enable(GetDlgItem(dialogWindow, IDC_LOCATION), false);
@@ -1144,7 +1143,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 
 			if (isRunning) {
 
-				PostMessage(dialogWindow, WM_COMMAND, ID_STOP, 0);
+				PostMessage(dialogWindow_, WM_COMMAND, ID_STOP, 0);
 				CloseCalibWindows();
 
 			} else {
@@ -1152,14 +1151,14 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 				for (int i = 0; i < GetMenuItemCount(menu1); ++i)
 					EnableMenuItem(menu1, i, MF_BYPOSITION | MF_ENABLED);
 				
-				DrawMenuBar(dialogWindow);
+				DrawMenuBar(dialogWindow_);
 				
-				Button_Enable(GetDlgItem(dialogWindow, ID_START), true);
-				Button_Enable(GetDlgItem(dialogWindow, ID_STOP), false);
+				Button_Enable(GetDlgItem(dialogWindow_, ID_START), true);
+				Button_Enable(GetDlgItem(dialogWindow_, ID_STOP), false);
 				//Button_Enable(GetDlgItem(dialogWindow, IDC_LOCATION), true);
 				//Button_Enable(GetDlgItem(dialogWindow, IDC_LANDMARK), true);
-				Button_Enable(GetDlgItem(dialogWindow, ID_LOAD_CALIB), true);
-				Button_Enable(GetDlgItem(dialogWindow, ID_NEW_CALIB), true);
+				Button_Enable(GetDlgItem(dialogWindow_, ID_LOAD_CALIB), true);
+				Button_Enable(GetDlgItem(dialogWindow_, ID_NEW_CALIB), true);
 
 				/*
 				deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
@@ -1197,11 +1196,11 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow, UINT message, WPARAM wPara
 		break;
 
 	case WM_SIZE:
-		RedoLayout(dialogWindow);
+		RedoLayout(dialogWindow_);
 		return TRUE;
 
     case WM_ACTIVATEAPP:
-        isActiveApp = wParam != 0;
+        isActiveApp = wParam_ != 0;
         break;
 	/*
 	case WM_NOTIFY:
@@ -1266,7 +1265,7 @@ HWND CreateTabControl(HWND hWnd, HINSTANCE hInstance)
 	return NULL;
 }
 */
-int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
+int APIENTRY wWinMain(HINSTANCE hInstance_, HINSTANCE, LPTSTR, int) {
 	
 	if (DEBUG)
 	{
@@ -1283,7 +1282,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
 		_In_ const LPINITCOMMONCONTROLSEX lpInitCtrls
 	);
 
-	ghInstance = hInstance;
+	g_hInstance = hInstance_;
 
 	// Session for device
 	session = PXCSession::CreateInstance();
@@ -1297,7 +1296,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
     }
 	*/
 
-    HWND dialogWindow = CreateDialogW(hInstance, MAKEINTRESOURCE(IDD_MAINFRAME), 0, MessageLoopThread);
+    HWND dialogWindow = CreateDialogW(hInstance_, MAKEINTRESOURCE(IDD_MAINFRAME), 0, MessageLoopThread);
 	// Error logging for bad window
 	/*
     if (!dialogWindow)  
@@ -1308,7 +1307,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
 	*/
 
 	// set to global window var
-	ghWnd = dialogWindow;
+	g_hWnd = dialogWindow;
 
 	HWND statusWindow = CreateStatusWindow(WS_CHILD | WS_VISIBLE, L"", dialogWindow, IDC_STATUS);	
 	// Error logging for bad status window
@@ -1360,8 +1359,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int) {
 	}
 
 	// Create global mutex for shared threads
-	ghMutex = CreateMutex(NULL, FALSE, NULL);
-	if (ghMutex == NULL) 
+	g_hMutex = CreateMutex(NULL, FALSE, NULL);
+	if (g_hMutex == NULL) 
 	{
 		MessageBoxW(0, L"Failed to create mutex", L"Face Viewer", MB_ICONEXCLAMATION | MB_OK);
 		delete renderer;

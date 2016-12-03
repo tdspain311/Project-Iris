@@ -1,6 +1,6 @@
 #include "RendererManager.h"
 
-extern HANDLE ghMutex;
+extern HANDLE g_hMutex;
 /*
 FaceTrackingRendererManager::FaceTrackingRendererManager(FaceTrackingRenderer2D* renderer2D, FaceTrackingRenderer3D* renderer3D) :
 	m_renderer2D(renderer2D), m_renderer3D(renderer3D), m_currentRenderer(NULL)
@@ -28,7 +28,7 @@ RendererManager::~RendererManager(void)
 void RendererManager::SetRendererType(Renderer::RendererType type)
 {
 	DWORD dwWaitResult;
-	dwWaitResult = WaitForSingleObject(ghMutex,	INFINITE);
+	dwWaitResult = WaitForSingleObject(g_hMutex,	INFINITE);
 	if(dwWaitResult == WAIT_OBJECT_0)
 	{
 		/*
@@ -43,7 +43,7 @@ void RendererManager::SetRendererType(Renderer::RendererType type)
 		*/
 		m_currentRenderer = m_renderer3D;
 
-		if(!ReleaseMutex(ghMutex))
+		if(!ReleaseMutex(g_hMutex))
 		{
 			throw std::exception("Failed to release mutex");
 			return;
