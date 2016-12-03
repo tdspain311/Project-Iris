@@ -391,7 +391,7 @@ BOOL CALLBACK LoadCalibProc(HWND hwndDlg_, UINT message_, WPARAM wParam_, LPARAM
 
 					do {
 
-						SendMessageA(GetDlgItem(hwndDlg, IDC_LIST1), LB_ADDSTRING, 0, (LPARAM)dirFile.name);
+						SendMessageA(GetDlgItem(hwndDlg_, IDC_LIST1), LB_ADDSTRING, 0, (LPARAM)dirFile.name);
 
 					} while ( _findnext( hFile, &dirFile ) == 0 );
 
@@ -401,7 +401,7 @@ BOOL CALLBACK LoadCalibProc(HWND hwndDlg_, UINT message_, WPARAM wParam_, LPARAM
 
 			}
 
-			SendMessageA(GetDlgItem(hwndDlg, IDC_LIST1), LB_SETCURSEL, 0, (LPARAM)0);
+			SendMessageA(GetDlgItem(hwndDlg_, IDC_LIST1), LB_SETCURSEL, 0, (LPARAM)0);
 			break;
 
         case WM_COMMAND: 
@@ -412,8 +412,8 @@ BOOL CALLBACK LoadCalibProc(HWND hwndDlg_, UINT message_, WPARAM wParam_, LPARAM
 				{
 					WCHAR name[max_path_length];
 					WCHAR temp[max_path_length];
-					int index = SendMessage(GetDlgItem(hwndDlg, IDC_LIST1), LB_GETCURSEL, (WPARAM)0 , (LPARAM)0);
-					SendMessage(GetDlgItem(hwndDlg, IDC_LIST1), LB_GETTEXT, (WPARAM)index , (LPARAM)name);
+					int index = SendMessage(GetDlgItem(hwndDlg_, IDC_LIST1), LB_GETCURSEL, (WPARAM)0 , (LPARAM)0);
+					SendMessage(GetDlgItem(hwndDlg_, IDC_LIST1), LB_GETTEXT, (WPARAM)index , (LPARAM)name);
 					GetTempPath(max_path_length, temp);
 					
 					StringCbPrintf(m_CalibFilename, sizeof(m_CalibFilename), L"%s%s", temp, name);
@@ -734,7 +734,7 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg_, UINT message_, WPARAM wParam_, LPARAM l
 
 			} else { // continue working
 
-				if (!GetDlgItemText(hwndDlg_, IDC_EDIT, m_Username, 40))	wsprintf(m_Username, L"default_user");
+				if (!GetDlgItemText(hwndDlg_, IDC_EDIT1, m_Username, 40))	wsprintf(m_Username, L"default_user");
 				EndDialog(hwndDlg_, wParam_); 
 
 			}
@@ -745,12 +745,12 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg_, UINT message_, WPARAM wParam_, LPARAM l
 
 		case WM_INITDIALOG:
 			
-			SetDlgItemText(hwndDlg, IDC_EDIT1, user_name);
+			SetDlgItemText(hwndDlg_, IDC_EDIT1, m_Username);
 			wsprintf(m_Username, L"default_user");
 			
 			if (!calibBuffer) {
 
-				Edit_Enable(GetDlgItem(hwndDlg, IDC_EDIT1), false);
+				Edit_Enable(GetDlgItem(hwndDlg_, IDC_EDIT1), false);
 				Button_Enable(GetDlgItem(hwndDlg_, ID_DETAILS) , false);
 				Button_Enable(GetDlgItem(hwndDlg_, ID_OK) , false);
 				//SetDlgItemText(hwndDlg, ID_OK, L"Close");
@@ -831,7 +831,7 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg_, UINT message_, WPARAM wParam_, LPARAM l
 
 				} else { // continue working
 
-					if (!GetDlgItemText(hwndDlg, IDC_EDIT1, user_name, 40))	wsprintf(user_name, L"default_user");
+					if (!GetDlgItemText(hwndDlg_, IDC_EDIT1, m_Username, 40))	wsprintf(m_Username, L"default_user");
 					EndDialog(hwndDlg_, wParam_); 
 
 				}
