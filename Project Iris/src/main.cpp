@@ -45,6 +45,8 @@ static RECT layout[3 + sizeof(controls) / sizeof(controls[0])];
 
 volatile int eye_point_x = 2000;
 volatile int eye_point_y = 2000;
+extern volatile float eye_horizontal_angle = 0;
+extern volatile float eye_vertical_angle = 0;
 
 const int max_path_length = 1024;
 
@@ -301,18 +303,52 @@ void UpdateTracking() {
 			SetWindowPos(g_hWndEyePoint, NULL, cursorPos.x - width/2, cursorPos.y - height/2, width, height, NULL);
 		
 		} else {
-
 			// Gaze position
+			//SetWindowPos(g_hWndEyePoint, NULL, eye_point_x - width / 2, eye_point_y - height / 2, width, height, NULL);
+			*/
 			if (DEBUG)
 			{
-				std::cout << "Gaze Position X: " << eye_point_x << " || Y: " << eye_point_y << std::endl;
+				RECT wrc;
+				HWND hDesktop = GetDesktopWindow();
+				GetWindowRect(hDesktop, &wrc);
+
+				HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+				
+				//SetConsoleTextAttribute(hConsole, 15);
+				//std::cout << "Window (Top, Right, Bottom, Left): " << wrc.top << ", " << wrc.right << ", " << wrc.bottom << ", " << wrc.left << std::endl;
+
+				if ((eye_horizontal_angle >= -MAX_ANGLE && eye_horizontal_angle <= MAX_ANGLE) &&
+					(eye_vertical_angle >= -MAX_ANGLE && eye_vertical_angle <= MAX_ANGLE))
+				{
+					if ((eye_point_x <= wrc.right) && (eye_point_y <= wrc.bottom))
+					{
+						SetConsoleTextAttribute(hConsole, 15);
+						std::cout << "Gaze Position X: " << eye_point_x << " || Y: " << eye_point_y << " Horizontal Angle: " << eye_horizontal_angle << " || Vertical Angle: " << eye_vertical_angle << std::endl;
+					}
+					else
+					{
+						SetConsoleTextAttribute(hConsole, 14);
+						std::cout << "Gaze Position X: " << eye_point_x << " || Y: " << eye_point_y << " Horizontal Angle: " << eye_horizontal_angle << " || Vertical Angle: " << eye_vertical_angle << std::endl;
+						if (eye_point_x > wrc.right)
+							eye_point_x = wrc.right - width/2;
+						if (eye_point_x < wrc.left)
+							eye_point_x = wrc.left + width/2;
+						if (eye_point_y > wrc.bottom)
+							eye_point_y = wrc.bottom - height/2;
+						if (eye_point_y < wrc.top)
+							eye_point_y = wrc.top + height/2;
+					}
+				}
+				else
+				{
+					SetConsoleTextAttribute(hConsole, 4);
+					std::cout << "Gaze Position X: " << eye_point_x << " || Y: " << eye_point_y << " Horizontal Angle: " << eye_horizontal_angle << " || Vertical Angle: " << eye_vertical_angle << std::endl;
+				}
+				//SetCursorPos(eye_point_x, eye_point_y);
+				//SetWindowPos(g_hWndEyePoint, NULL, eye_point_x - width / 2, eye_point_y - height / 2, width, height, NULL);
 			}
-			//SetWindowPos(ghWndEyePoint, NULL, eye_point_x - width/2, eye_point_y - height/2, width, height, NULL);
-
-		}
-
+		//}
 	}
-
 }
 
 /*

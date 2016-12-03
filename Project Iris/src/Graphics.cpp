@@ -395,8 +395,23 @@ void Graphics::DrawPose(PXCFaceData::Face* trackedFace)
 	PXCFaceData::HeadPosition outFaceCenterPoint;
 	poseData->QueryHeadPosition(&outFaceCenterPoint);
 
+	// TESTING
+	PXCFaceData::PoseQuaternion poseQuaternion;
+	poseData->QueryPoseQuaternion(&poseQuaternion);
+
+	if (DEBUG)
+	{
+		std::cout << "Quaternion X: " << poseQuaternion.x << " Y: " << poseQuaternion.y << " Z: " << poseQuaternion.z << " Scale: " << poseQuaternion.w << std::endl;
+	}
+
+	PXCPoint3DF32 pose;
+	pose.x = poseQuaternion.x;
+	pose.y = poseQuaternion.y;
+	pose.z = poseQuaternion.z;
+
+	int pose_x = 0, pose_y = 0;
 	int headCenter_x = 0, headCenter_y = 0;	
-	if(ProjectVertex(outFaceCenterPoint.headCenter, headCenter_x, headCenter_y, 1))
+	if(ProjectVertex(outFaceCenterPoint.headCenter, headCenter_x, headCenter_y, 1) && ProjectVertex(pose, pose_x, pose_y, 1))
 	{
 		
 		if(poseData->QueryConfidence() > 0 && outFaceCenterPoint.confidence > 0)
@@ -465,19 +480,23 @@ void Graphics::DrawPose(PXCFaceData::Face* trackedFace)
 				return;
 			}
 			SelectObject(dc2, poseLine);
-
-			if (DEBUG) {
+			/*
+			if (!DEBUG) {
 				std::cout << "Direction X: " << direction.x << " Y: " << direction.y << std::endl;
 				std::cout << "Head X: " << headCenter_x << " Y: " << headCenter_y << std::endl;
 				std::cout << "Nose X: " << noseTip_x << " Y: " << noseTip_y << std::endl;
+				std::cout << "Pose X: " << pose_x << " Y: " << pose_y << std::endl;
 			}
-
+			*/
 
 			// TESTING
 			// Look into PoseQuaternion
 
-			int endPoseX = noseTip_x - (1.5 * direction.x);
-			int endPoseY = noseTip_y - (1.5 * direction.y);
+			//int endPoseX = noseTip_x - (1.5 * direction.x);
+			//int endPoseY = noseTip_y - (1.5 * direction.y);
+
+			int endPoseX = pose_x - (1.5 * direction.x);
+			int endPoseY = pose_y - (1.5 * direction.y);
 
 			//MoveToEx(dc2, noseTip_x, noseTip_y, 0);
 			//LineTo(dc2, noseTip_x + 1.2 * direction.x, noseTip_y + 1.2 * direction.y);

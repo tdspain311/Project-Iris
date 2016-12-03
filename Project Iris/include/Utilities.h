@@ -31,7 +31,6 @@ enum CalibMode {
 
 	mode_calib,
 	mode_playback,
-	mode_record,
 	mode_live
 
 };
@@ -39,6 +38,9 @@ enum CalibMode {
 extern volatile int eye_point_x;
 extern volatile int eye_point_y;
 extern volatile bool isPaused;
+
+extern volatile float eye_horizontal_angle;
+extern volatile float eye_vertical_angle;
 
 void InitCalibWindows(CalibMode mode);
 void CloseCalibWindows();
