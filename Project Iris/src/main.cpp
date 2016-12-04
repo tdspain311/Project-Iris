@@ -340,13 +340,13 @@ void UpdateTracking() {
 						SetConsoleTextAttribute(hConsole, 14);
 						std::cout << "Gaze Position X: " << eye_point_x << " || Y: " << eye_point_y << " Horizontal Angle: " << eye_horizontal_angle << " || Vertical Angle: " << eye_vertical_angle << std::endl;
 						if (eye_point_x > wrc.right) // 1920
-							eye_point_x = wrc.right - width / 2;
+							eye_point_x = wrc.right - width;
 						if (eye_point_x < wrc.left) // 0
-							eye_point_x = wrc.left + width / 2;
+							eye_point_x = wrc.left + width;
 						if (eye_point_y > wrc.bottom) // 1080
-							eye_point_y = wrc.bottom - height / 2;
+							eye_point_y = wrc.bottom - height;
 						if (eye_point_y < wrc.top) // 0
-							eye_point_y = wrc.top + height / 2;
+							eye_point_y = wrc.top + height;
 					}
 					gaze_point_x = eye_point_x;
 					gaze_point_y = eye_point_y;
