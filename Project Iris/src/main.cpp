@@ -45,6 +45,8 @@ static RECT layout[3 + sizeof(controls) / sizeof(controls[0])];
 
 volatile int eye_point_x = 2000;
 volatile int eye_point_y = 2000;
+int gaze_point_x = 0;
+int gaze_point_y = 0;
 extern volatile float eye_horizontal_angle = 0;
 extern volatile float eye_vertical_angle = 0;
 
@@ -64,7 +66,7 @@ static make_layered set_layered_window = NULL;
 static BOOL dll_initialized = FALSE;
 
 static BOOL DEBUG = TRUE;
-static int MAX_ANGLE = 40;
+static int MAX_ANGLE = 30;
 
 bool make_transparent(HWND hWnd_) {
 
@@ -271,11 +273,11 @@ void InitCalibWindows(CalibMode mode_) {
 	case mode_playback:
 		InitTransWindow(&g_hWndEyePoint, 30, RGB(255, 255, 0), L"GPI Clip");
 		break;
-	/*
+	
 	case mode_record:
 		InitSimpleWindow(&g_hWndEyePoint, 35, RGB(255, 0, 0), L"GPI Record");
 		break;
-	*/
+	
 	}
 
 	// focus on main window
@@ -295,17 +297,22 @@ void UpdateTracking() {
 
 		int width = rc.right - rc.left;
 		int height = rc.bottom - rc.top;
-
+		
 		if (modeWork == mode_record) {
 
 			POINT cursorPos;
 			GetCursorPos(&cursorPos);
-			SetWindowPos(g_hWndEyePoint, NULL, cursorPos.x - width/2, cursorPos.y - height/2, width, height, NULL);
-		
-		} else {
+			SetWindowPos(g_hWndEyePoint, NULL, cursorPos.x - width / 2, cursorPos.y - height / 2, width, height, NULL);
+		}
+		else if (modeWork == mode_calib) {
+
+			SetWindowPos(g_hWndEyePoint, NULL, eye_point_x - width / 2, eye_point_y - height / 2, width, height, NULL);
+
+		}
+		else {
 			// Gaze position
 			//SetWindowPos(g_hWndEyePoint, NULL, eye_point_x - width / 2, eye_point_y - height / 2, width, height, NULL);
-			*/
+
 			if (DEBUG)
 			{
 				RECT wrc;
@@ -320,34 +327,40 @@ void UpdateTracking() {
 				if ((eye_horizontal_angle >= -MAX_ANGLE && eye_horizontal_angle <= MAX_ANGLE) &&
 					(eye_vertical_angle >= -MAX_ANGLE && eye_vertical_angle <= MAX_ANGLE))
 				{
-					if ((eye_point_x <= wrc.right) && (eye_point_y <= wrc.bottom))
+					if ((eye_point_x <= wrc.right) && (eye_point_x >= wrc.left) &&
+						(eye_point_y <= wrc.bottom) && (eye_point_y >= wrc.top))
 					{
+						// Trivial Accept
 						SetConsoleTextAttribute(hConsole, 15);
 						std::cout << "Gaze Position X: " << eye_point_x << " || Y: " << eye_point_y << " Horizontal Angle: " << eye_horizontal_angle << " || Vertical Angle: " << eye_vertical_angle << std::endl;
 					}
 					else
 					{
+						// Modify to Accept
 						SetConsoleTextAttribute(hConsole, 14);
 						std::cout << "Gaze Position X: " << eye_point_x << " || Y: " << eye_point_y << " Horizontal Angle: " << eye_horizontal_angle << " || Vertical Angle: " << eye_vertical_angle << std::endl;
-						if (eye_point_x > wrc.right)
-							eye_point_x = wrc.right - width/2;
-						if (eye_point_x < wrc.left)
-							eye_point_x = wrc.left + width/2;
-						if (eye_point_y > wrc.bottom)
-							eye_point_y = wrc.bottom - height/2;
-						if (eye_point_y < wrc.top)
-							eye_point_y = wrc.top + height/2;
+						if (eye_point_x > wrc.right) // 1920
+							eye_point_x = wrc.right - width / 2;
+						if (eye_point_x < wrc.left) // 0
+							eye_point_x = wrc.left + width / 2;
+						if (eye_point_y > wrc.bottom) // 1080
+							eye_point_y = wrc.bottom - height / 2;
+						if (eye_point_y < wrc.top) // 0
+							eye_point_y = wrc.top + height / 2;
 					}
+					gaze_point_x = eye_point_x;
+					gaze_point_y = eye_point_y;
 				}
 				else
 				{
+					// Trivial Reject
 					SetConsoleTextAttribute(hConsole, 4);
 					std::cout << "Gaze Position X: " << eye_point_x << " || Y: " << eye_point_y << " Horizontal Angle: " << eye_horizontal_angle << " || Vertical Angle: " << eye_vertical_angle << std::endl;
 				}
-				//SetCursorPos(eye_point_x, eye_point_y);
-				//SetWindowPos(g_hWndEyePoint, NULL, eye_point_x - width / 2, eye_point_y - height / 2, width, height, NULL);
+				//SetCursorPos(gaze_point_x, gaze_point_y);
+				SetWindowPos(g_hWndEyePoint, NULL, gaze_point_x, gaze_point_y, width, height, NULL);
 			}
-		//}
+		}
 	}
 }
 
@@ -1004,7 +1017,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 			}
 
 			return TRUE;
-
+			
 		}
 		*/
 		switch (LOWORD(wParam_)) {

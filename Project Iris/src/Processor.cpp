@@ -281,6 +281,13 @@ void Processor::Process(HWND dialogWindow) {
     renderer->SetNumberOfLandmarks(config->landmarks.numLandmarks);
     renderer->SetCallback(renderer->SignalProcessor);
 
+	// Creating PXCSmoother instance
+	PXCSmoother* smoother = NULL;
+	senseManager->QuerySession()->CreateImpl<PXCSmoother>(&smoother);
+
+	// Creating 2D smoother with quadratic algorithm with smooth value
+	PXCSmoother::Smoother2D* smoother2D = smoother->Create2DQuadratic(1.0f);
+
 	// acquisition loop
 
     if (!isStopped) {
@@ -323,12 +330,8 @@ void Processor::Process(HWND dialogWindow) {
             PXCCapture::Sample* sample = senseManager->QueryFaceSample();
             isNotFirstFrame = true;
 
-			// Creating PXCSmoother instance
-			PXCSmoother* smoother = NULL;
-			senseManager->QuerySession()->CreateImpl<PXCSmoother>(&smoother);
-
-			// Creating 2D smoother with quadratic algorithm with smooth value of 0.8
-			PXCSmoother::Smoother2D* smoother2D = smoother->Create2DQuadratic(1.0f);
+			//PXCCapture::Device *device = captureManager->QueryDevice();
+			//device->SetMirrorMode(PXCCapture::Device::MirrorMode::MIRROR_MODE_HORIZONTAL);
 
             if (sample != NULL) {
 
@@ -426,26 +429,29 @@ void Processor::Process(HWND dialogWindow) {
 									PXCFaceData::GazePoint gaze_point = trackedFace->QueryGaze()->QueryGazePoint();
 
 									PXCPointF32 new_point;
-									new_point.x = gaze_point.screenPoint.x;
-									new_point.y = gaze_point.screenPoint.y;
-
+									
+									new_point.x = (pxcF32)gaze_point.screenPoint.x;
+									new_point.y = (pxcF32)gaze_point.screenPoint.y;
+									
 									// Smoothing
 									PXCPointF32 smoothed2DPoint = smoother2D->SmoothValue(new_point);
 
 									// TESTING
 									pxcF64 horizontal_angle = trackedFace->QueryGaze()->QueryGazeHorizontalAngle();
 									pxcF64 vertical_angle = trackedFace->QueryGaze()->QueryGazeVerticalAngle();
+									
+									eye_horizontal_angle = horizontal_angle;
+									eye_vertical_angle = vertical_angle;
+									eye_point_x = (int)smoothed2DPoint.x;
+									eye_point_y = (int)smoothed2DPoint.y;
 									/*
 									if (DEBUG)
 									{
-										std::cout << "Gaze Position X: " << new_point.screenPoint.x << " || Y: " << new_point.screenPoint.y << "  -- Confidence: " << new_point.confidence
-											<< " -- Horizontal Angle: " << horizontal_angle << " || Vertical Angle: " << vertical_angle << std::endl;
+										std::cout << "Raw Gaze Position X: " << gaze_point.screenPoint.x << " || Y: " << gaze_point.screenPoint.y
+											<< " -- Casted Point x: " << new_point.x << " || Y: " << new_point.y
+											<< " -- Smoothed Point X: " << smoothed2DPoint.x << " || Y: " << smoothed2DPoint.y << std::endl;
 									}
 									*/
-									eye_horizontal_angle = horizontal_angle;
-									eye_vertical_angle = vertical_angle;
-									eye_point_x = new_point.x;
-									eye_point_y = new_point.y;
 								}
 
 							}
@@ -483,7 +489,7 @@ void Processor::Process(HWND dialogWindow) {
 	config->Release();
 	senseManager->Close(); 
 	senseManager->Release();
-
+	//device->Release();
 }
 
 void Processor::RegisterUser()
