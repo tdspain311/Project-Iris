@@ -45,10 +45,10 @@ static RECT layout[3 + sizeof(controls) / sizeof(controls[0])];
 
 volatile int eye_point_x = 2000;
 volatile int eye_point_y = 2000;
-int gaze_point_x = 0;
-int gaze_point_y = 0;
 extern volatile float eye_horizontal_angle = 0;
 extern volatile float eye_vertical_angle = 0;
+int gaze_point_x = 0;
+int gaze_point_y = 0;
 
 const int max_path_length = 1024;
 
@@ -1083,7 +1083,10 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 						GetTempPath(max_path_length, temp);
 						wsprintf(buff, L"%s%s.bin", temp, m_Username);
 
-						FILE* my_file = _wfopen(buff, L"wb");
+						FILE* my_file;
+						errno_t err;
+							
+						err = _wfopen_s(&my_file, buff, L"wb");
 
 						if (my_file) {
 

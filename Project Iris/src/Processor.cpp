@@ -184,9 +184,12 @@ void Processor::Process(HWND dialogWindow) {
 
 	if (isLoadCalibFile) {
 
-		FILE* my_file = _wfopen(m_CalibFilename, L"rb");
+		FILE* my_file;
+		errno_t err;
 
-		if (my_file) {
+		err = _wfopen_s(&my_file, m_CalibFilename, L"rb");
+
+		if (!err && my_file) {
 
 			if (calibBuffer == NULL) {
 
@@ -440,8 +443,8 @@ void Processor::Process(HWND dialogWindow) {
 									pxcF64 horizontal_angle = trackedFace->QueryGaze()->QueryGazeHorizontalAngle();
 									pxcF64 vertical_angle = trackedFace->QueryGaze()->QueryGazeVerticalAngle();
 									
-									eye_horizontal_angle = horizontal_angle;
-									eye_vertical_angle = vertical_angle;
+									eye_horizontal_angle = (float)horizontal_angle;
+									eye_vertical_angle = (float)vertical_angle;
 									eye_point_x = (int)smoothed2DPoint.x;
 									eye_point_y = (int)smoothed2DPoint.y;
 									/*

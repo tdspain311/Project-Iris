@@ -459,7 +459,7 @@ void Graphics::DrawPose(PXCFaceData::Face* trackedFace)
 		//if (ProjectVertex(points[29].world, noseTip_x, noseTip_y, 1))
 		if (ProjectVertex(nosePoint.world, noseTip_x, noseTip_y, 1))
 		{
-			PXCPoint3DF32 direction;
+			PXCPointI32 direction;
 			//direction.x = headCenter_x - noseTip_x;
 			//direction.y = headCenter_y - noseTip_y;
 			direction.x = noseTip_x - headCenter_x;
@@ -495,8 +495,8 @@ void Graphics::DrawPose(PXCFaceData::Face* trackedFace)
 			//int endPoseX = noseTip_x - (1.5 * direction.x);
 			//int endPoseY = noseTip_y - (1.5 * direction.y);
 
-			int endPoseX = pose_x - (1.5 * direction.x);
-			int endPoseY = pose_y - (1.5 * direction.y);
+			int endPoseX = int(pose_x - (1.5 * (double)direction.x));
+			int endPoseY = int(pose_y - (1.5 * (double)direction.y));
 
 			//MoveToEx(dc2, noseTip_x, noseTip_y, 0);
 			//LineTo(dc2, noseTip_x + 1.2 * direction.x, noseTip_y + 1.2 * direction.y);
