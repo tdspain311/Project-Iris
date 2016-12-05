@@ -111,20 +111,10 @@ void Processor::Process(HWND dialogWindow) {
 	/* Set Mode & Source */
 
 	PXCCaptureManager* captureManager = senseManager->QueryCaptureManager();
-	/*
-	if (!FaceTrackingUtilities::GetPlaybackState(dialogWindow)) {
-		captureManager->FilterByDeviceInfo(FaceTrackingUtilities::GetCheckedDeviceInfo(dialogWindow));
-	}
-	*/
 
 	pxcStatus status = PXC_STATUS_NO_ERROR;
-	/*
-	if (Utilities::GetRecordState(dialogWindow)) { // we are recording
 
-		status = captureManager->SetFileName(m_rssdkFilename, true);
-
-	} else*/
-	if (Utilities::GetPlaybackState(dialogWindow)) { // we are playing
+	if (Utilities::GetPlaybackState(dialogWindow)) {
 
 		status = captureManager->SetFileName(m_rssdkFilename, false);
 		senseManager->QueryCaptureManager()->SetRealtime(true);
@@ -139,11 +129,9 @@ void Processor::Process(HWND dialogWindow) {
 	}
 
 	/* Set Module */
-
 	senseManager->EnableFace();
 
 	/* Initialize */
-	
 	Utilities::SetStatus(dialogWindow, L"Init Started", statusPart);
 
 	PXCFaceModule* faceModule = senseManager->QueryFace();

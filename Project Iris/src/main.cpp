@@ -701,11 +701,9 @@ static DWORD WINAPI RenderingThread(LPVOID arg_) {
 	while (true) {
 
 		// update tracking
-
 		UpdateTracking();
 
 		// render
-
 		renderer->Render();
 
 	}
@@ -793,7 +791,6 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg_, UINT message_, WPARAM wParam_, LPARAM l
 			}
 
 			// show calibration results
-
 			switch (calib_status) {
 
 			case 0:
@@ -819,27 +816,27 @@ BOOL CALLBACK ResultsProc(HWND hwndDlg_, UINT message_, WPARAM wParam_, LPARAM l
 			}
 
 			// show dominant eye
-			/*
+			
 			switch (dominant_eye) {
 
 			case 0:
-				SetDlgItemText(hwndDlg, IDC_RESULTS_EYE, L"The current dominant eye for this calibration is: Right");
+				SetDlgItemText(hwndDlg_, IDC_RESULTS_EYE, L"The current dominant eye for this calibration is: Right");
 				break;
 
 			case 1:
-				SetDlgItemText(hwndDlg, IDC_RESULTS_EYE, L"The current dominant eye for this calibration is: Left");
+				SetDlgItemText(hwndDlg_, IDC_RESULTS_EYE, L"The current dominant eye for this calibration is: Left");
 				break;
 
 			case 2:
-				SetDlgItemText(hwndDlg, IDC_RESULTS_EYE, L"The current dominant eye for this calibration is: Both");
+				SetDlgItemText(hwndDlg_, IDC_RESULTS_EYE, L"The current dominant eye for this calibration is: Both");
 				break;
 
 			default:
-				SetDlgItemText(hwndDlg, IDC_RESULTS_EYE, L"The current dominant eye for this calibration is: Unknown");
+				SetDlgItemText(hwndDlg_, IDC_RESULTS_EYE, L"The current dominant eye for this calibration is: Unknown");
 				break;
 
 			}
-			*/
+			
 			break;
 
         case WM_COMMAND: 
@@ -1018,12 +1015,13 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 
 					return TRUE;
 
-				case ID_CALIB_LOADED: // calibration was loaded
-					//if (modeWork != mode_record)
+				case ID_CALIB_LOADED: 
+					// calibration was loaded
 					InitCalibWindows(mode_live);
 					break;
 
-				case ID_CALIB_DONE: // calibration was completed
+				case ID_CALIB_DONE: 
+					// calibration was completed
 			
 					isPaused = true;
 
@@ -1055,7 +1053,6 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 							if (calibBuffer) {
 
 								// save this data
-
 								WCHAR temp[max_path_length];
 								WCHAR buff[max_path_length];
 
@@ -1078,16 +1075,15 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 				
 							InitCalibWindows(mode_live);
 
-						} else { // repeat calibration
+						} else { 
+							// repeat calibration
 			
-							// stop calibration threat
-
+							// stop calibration thread
 							isPaused = false;
 							isStopped = true;
 							Sleep(1000);
 
 							// start new thread
-
 							isStopped = false;
 							isRunning = true;
 
@@ -1106,13 +1102,14 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 					isPaused = false;
 					break;
 
-				case ID_LOAD_CALIB: // load calibration file or force a new one
+				case ID_LOAD_CALIB: 
+					// load calibration file or force a new one
 					isLoadCalibFile = GetCalibFile();
 					Button_Enable(GetDlgItem(dialogWindow_, ID_START), m_CalibFilename[0] != 0);
 					break;
 
-				case ID_NEW_CALIB: // start new calibration
-
+				case ID_NEW_CALIB: 
+					// start new calibration
 					delete [] calibBuffer;
 					calibBuffer = NULL;
 					calibBuffersize = 0;
@@ -1125,8 +1122,6 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 					Button_Enable(GetDlgItem(dialogWindow_, ID_START), false);
 					Button_Enable(GetDlgItem(dialogWindow_, ID_STOP), true);
 
-					//dominant_eye = SendMessage(GetDlgItem(dialogWindow, IDC_LIST1), LB_GETCURSEL, (WPARAM)0 , (LPARAM)0);
-
 					// Greys menu bar
 					for (int i = 0;i < GetMenuItemCount(menu1); ++i)
 						EnableMenuItem(menu1, i, MF_BYPOSITION | MF_GRAYED);
@@ -1137,23 +1132,12 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 					isRunning = true;
 
 					// init the calibration windows
-
 					if (isLoadCalibFile == false && calibBuffersize == 0) {
-
 						InitCalibWindows(mode_calib);
-					/*
-					} else if (GetMenuState(GetMenu(dialogWindow_), ID_MODE_RECORD, MF_BYCOMMAND) & MF_CHECKED) {
-
-						InitCalibWindows(mode_record);
-					*/
 					} else if (GetMenuState(GetMenu(dialogWindow_), ID_MODE_PLAYBACK, MF_BYCOMMAND) & MF_CHECKED) {
-
 						InitCalibWindows(mode_playback);
-
 					} else {
-
 						InitCalibWindows(mode_live);
-
 					}
 
 					if (processor) delete processor;
@@ -1166,7 +1150,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 					Button_Enable(GetDlgItem(dialogWindow, IDC_LANDMARK), false);
 					Button_Enable(GetDlgItem(dialogWindow, IDC_POSE), false);
 					*/
-					Sleep(0); //TODO: remove
+					//Sleep(0); //TODO: remove
 					return TRUE;
 
 				case ID_STOP:
@@ -1206,37 +1190,38 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 
 					CheckMenuItem(menu1, ID_MODE_LIVE, MF_CHECKED);
 					CheckMenuItem(menu1, ID_MODE_PLAYBACK, MF_UNCHECKED);
-					//CheckMenuItem(menu1, ID_MODE_RECORD, MF_UNCHECKED);
+					
 					return TRUE;
 
 				case ID_MODE_PLAYBACK:
 
 					CheckMenuItem(menu1, ID_MODE_LIVE, MF_UNCHECKED);
 					CheckMenuItem(menu1, ID_MODE_PLAYBACK, MF_CHECKED);
-					//CheckMenuItem(menu1, ID_MODE_RECORD, MF_UNCHECKED);
+					
 					GetPlaybackFile();
+					
 					return TRUE;
-				/*
-				case ID_MODE_RECORD:
 
-					CheckMenuItem(menu1, ID_MODE_LIVE, MF_UNCHECKED);
-					CheckMenuItem(menu1, ID_MODE_PLAYBACK, MF_UNCHECKED);
-					CheckMenuItem(menu1, ID_MODE_RECORD, MF_CHECKED);
-					GetRecordFile();
-					return TRUE;
-				*/
 				case ID_ALWAYSON_GPI:
+					
 					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_GPI, MF_CHECKED);
 					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_MOUSE, MF_UNCHECKED);
+					
 					break;
+				
 				case ID_ALWAYSON_MOUSE:
+					
 					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_MOUSE, MF_CHECKED);
 					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_GPI, MF_UNCHECKED);
+					
 					break;
+				
 				case ID_HOTKEY_ASSIGNED:
+					
 					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_MOUSE, MF_UNCHECKED);
 					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_GPI, MF_UNCHECKED);
 					CheckMenuItem(GetSubMenu(menu1, 1), ID_HOTKEY_ASSIGNED, MF_CHECKED);
+					
 					break;
 				} 
 			break;

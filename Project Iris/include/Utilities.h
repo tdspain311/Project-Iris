@@ -19,7 +19,6 @@ public:
 	static pxcCHAR* GetCheckedModule(HWND dialogWindow);
 	static void SetStatus(HWND dialogWindow, pxcCHAR *line, StatusWindowPart part);
 	static bool IsModuleSelected(HWND hwndDlg, const int moduleID);
-	static bool GetRecordState(HWND hwndDlg);
 	static bool GetPlaybackState(HWND DialogWindow);
 	static PXCFaceConfiguration::TrackingModeType GetCheckedProfile(HWND dialogWindow);
 	static const int TextHeight = 16;
