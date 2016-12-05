@@ -118,12 +118,13 @@ void Processor::Process(HWND dialogWindow) {
 	*/
 
 	pxcStatus status = PXC_STATUS_NO_ERROR;
-
+	/*
 	if (Utilities::GetRecordState(dialogWindow)) { // we are recording
 
 		status = captureManager->SetFileName(m_rssdkFilename, true);
 
-	} else if (Utilities::GetPlaybackState(dialogWindow)) { // we are playing
+	} else*/
+	if (Utilities::GetPlaybackState(dialogWindow)) { // we are playing
 
 		status = captureManager->SetFileName(m_rssdkFilename, false);
 		senseManager->QueryCaptureManager()->SetRealtime(true);

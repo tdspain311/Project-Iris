@@ -31,7 +31,6 @@ enum CalibMode {
 
 	mode_calib,
 	mode_playback,
-	mode_record,
 	mode_live
 
 };

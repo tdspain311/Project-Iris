@@ -17,11 +17,12 @@ bool Utilities::GetPlaybackState(HWND DialogWindow)
 {
 	return (GetMenuState(GetMenu(DialogWindow), ID_MODE_PLAYBACK, MF_BYCOMMAND) & MF_CHECKED) != 0;
 }
-
+/*
 bool Utilities::GetRecordState(HWND hwndDlg)
 {
 	return (GetMenuState(GetMenu(hwndDlg), ID_MODE_RECORD, MF_BYCOMMAND) & MF_CHECKED) != 0;
 }
+*/
 /*
 bool FaceTrackingUtilities::IsModuleSelected(HWND hwndDlg, const int moduleID)
 {

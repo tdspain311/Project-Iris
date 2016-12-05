@@ -40,7 +40,7 @@ volatile bool isPaused = false;
 volatile bool isActiveApp = true;
 volatile bool isLoadCalibFile = false;
 
-static int controls[] = { IDC_SCALE, IDC_LOCATION, IDC_LANDMARK, IDC_POSE, ID_START, ID_STOP, ID_LOAD_CALIB, ID_NEW_CALIB, IDC_STATIC2, IDC_LIST1 };
+static int controls[] = { ID_START, ID_STOP, ID_LOAD_CALIB, ID_NEW_CALIB, IDC_STATIC2, IDC_LIST1 };
 static RECT layout[3 + sizeof(controls) / sizeof(controls[0])];
 
 volatile int eye_point_x = 2000;
@@ -90,27 +90,23 @@ bool make_transparent(HWND hWnd_) {
 
 LRESULT CALLBACK WndProc(HWND hWnd_, UINT message_, WPARAM wParam_, LPARAM lParam_) {
 
-	switch (message_)
-	{
+	switch (message_) {
 
-	case WM_KEYDOWN: // exit calibration
+	case WM_KEYDOWN:
 
 		switch (wParam_) {
 
-		case VK_ESCAPE:
-			PostMessage(g_hWnd, WM_COMMAND, ID_STOP, 0);
-			CloseWindow(hWnd_);
-			break;
-
+			case VK_ESCAPE:
+				PostMessage(g_hWnd, WM_COMMAND, ID_STOP, 0);
+				CloseWindow(hWnd_);
+				break;
 		}
-
 	}
 
 	// default message handling
 
 	if (message_) return DefWindowProc(hWnd_, message_, wParam_, lParam_);
 	else return 0;
-
 }
 
 ATOM MyRegisterClass(HINSTANCE hInstance_, DWORD color_, WCHAR* name_) {
@@ -253,12 +249,11 @@ void EnableBackWindow() {
 void InitCalibWindows(CalibMode mode_) {
 
 	// close the old windows
-
 	CloseCalibWindows();
 
 	// init calibration windows
-
 	modeWork = mode_; 
+	
 	switch (mode_) {
 
 	case mode_calib:
@@ -273,15 +268,9 @@ void InitCalibWindows(CalibMode mode_) {
 	case mode_playback:
 		InitTransWindow(&g_hWndEyePoint, 30, RGB(255, 255, 0), L"GPI Clip");
 		break;
-	
-	case mode_record:
-		InitSimpleWindow(&g_hWndEyePoint, 35, RGB(255, 0, 0), L"GPI Record");
-		break;
-	
 	}
 
 	// focus on main window
-	
 	SetFocus(g_hWnd);
 
 }
@@ -297,19 +286,14 @@ void UpdateTracking() {
 
 		int width = rc.right - rc.left;
 		int height = rc.bottom - rc.top;
-		
-		if (modeWork == mode_record) {
 
-			POINT cursorPos;
-			GetCursorPos(&cursorPos);
-			SetWindowPos(g_hWndEyePoint, NULL, cursorPos.x - width / 2, cursorPos.y - height / 2, width, height, NULL);
-		}
-		else if (modeWork == mode_calib) {
+		if (modeWork == mode_calib) {
 
 			SetWindowPos(g_hWndEyePoint, NULL, eye_point_x - width / 2, eye_point_y - height / 2, width, height, NULL);
 
 		}
-		else {
+		else
+		{
 			// Gaze position
 			//SetWindowPos(g_hWndEyePoint, NULL, eye_point_x - width / 2, eye_point_y - height / 2, width, height, NULL);
 
@@ -702,7 +686,7 @@ void RedoLayout(HWND dialogWindow_) {
 		SWP_NOZORDER);
 
 	/* Buttons & CheckBoxes */
-	/*
+	
 	for (int i = 0; i < sizeof(controls) / sizeof(controls[0]); ++i) {
 
 		SetWindowPos(
@@ -713,7 +697,7 @@ void RedoLayout(HWND dialogWindow_) {
 			(layout[3 + i].bottom - layout[3 + i].top),
 			SWP_NOZORDER);
 	
-	}*/
+	}
 
 }
 
@@ -935,361 +919,359 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 
 	switch (message_) {
 
-	case WM_INITDIALOG:
-
-		//PopulateDevice(menu1);
-		/*
-		CheckDlgButton(dialogWindow, IDC_LOCATION, BST_CHECKED);
-		CheckDlgButton(dialogWindow, IDC_SCALE, BST_CHECKED);
-		CheckDlgButton(dialogWindow, IDC_LANDMARK, BST_CHECKED);
-		CheckDlgButton(dialogWindow, IDC_POSE, BST_CHECKED);
-		*/
-
-		//deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
-		/*
-		if (wcsstr(deviceName, L"R200") == NULL && wcsstr(deviceName, L"DS4") == NULL) {
-
+		case WM_INITDIALOG:
+			//SetFocus(dialogWindow_);
+			//PopulateDevice(menu1);
+			/*
+			CheckDlgButton(dialogWindow, IDC_LOCATION, BST_CHECKED);
+			CheckDlgButton(dialogWindow, IDC_SCALE, BST_CHECKED);
+			CheckDlgButton(dialogWindow, IDC_LANDMARK, BST_CHECKED);
 			CheckDlgButton(dialogWindow, IDC_POSE, BST_CHECKED);
+			*/
 
-		} else {
+			//deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
+			/*
+			if (wcsstr(deviceName, L"R200") == NULL && wcsstr(deviceName, L"DS4") == NULL) {
 
-			DisableUnsupportedAlgos(dialogWindow, true);
-
-		}
-		*/
-
-		//PopulateModule(menu1);
-		//PopulateProfile(dialogWindow);
-		//SaveLayout(dialogWindow);
-		/*
-		SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)"From Profile");
-		SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)"Right Eye");
-		SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)"Left Eye");
-		SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_SETCURSEL, 0, (LPARAM)0);
-		*/
-		return TRUE; 
-
-	break;
-
-	case WM_COMMAND:
-		/*
-		// Device Menu handle
-		menu2 = GetSubMenu(menu1, 0);
-
-		if (LOWORD(wParam) >= ID_DEVICEX && LOWORD(wParam) < ID_DEVICEX + GetMenuItemCount(menu2)) {
-
-			CheckMenuRadioItem(menu2, 0, GetMenuItemCount(menu2), LOWORD(wParam) - ID_DEVICEX, MF_BYPOSITION);	
-			deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
-			bool disable = (wcsstr(deviceName, L"R200") != NULL || wcsstr(deviceName, L"DS4") != NULL);
-			DisableUnsupportedAlgos(dialogWindow, disable);
-			return TRUE;
-
-		}
-		*/
-
-		/*
-		// Module menu handle
-		menu2 = GetSubMenu(menu1, 1);
-
-		if (LOWORD(wParam) >= ID_MODULEX && LOWORD(wParam) < ID_MODULEX + GetMenuItemCount(menu2)) {
-
-			CheckMenuRadioItem(menu2, 0, GetMenuItemCount(menu2), LOWORD(wParam) - ID_MODULEX,MF_BYPOSITION);
-			PopulateProfile(dialogWindow);
-			return TRUE;
-
-		}
-
-		menu2 = GetSubMenu(menu1, 2);
-		// Profile Menu handle
-		if (LOWORD(wParam) >= ID_PROFILEX && LOWORD(wParam) < ID_PROFILEX + GetMenuItemCount(menu2)) {
-
-			CheckMenuRadioItem(menu2, 0, GetMenuItemCount(menu2), LOWORD(wParam) - ID_PROFILEX,MF_BYPOSITION);
-			HWND hwndTab = GetDlgItem(dialogWindow, IDC_TAB);
-			
-			if(FaceTrackingUtilities::GetCheckedProfile(dialogWindow) == PXCFaceConfiguration::FACE_MODE_COLOR)	{
-
-				renderer->SetRendererType(FaceTrackingRenderer::R2D);
-
-			} else if(TabCtrl_GetCurSel(hwndTab) == 1) {
-
-				renderer->SetRendererType(FaceTrackingRenderer::R3D);
-
-			}
-
-			return TRUE;
-			
-		}
-		*/
-		switch (LOWORD(wParam_)) {
-
-		case IDCANCEL:
-
-			isStopped = true;
-
-			if (isRunning) {
-
-				PostMessage(dialogWindow_, WM_COMMAND, IDCANCEL, 0);
+				CheckDlgButton(dialogWindow, IDC_POSE, BST_CHECKED);
 
 			} else {
 
-				DestroyWindow(dialogWindow_); 
-				PostQuitMessage(0);
+				DisableUnsupportedAlgos(dialogWindow, true);
 
 			}
+			*/
 
-			return TRUE;
+			//PopulateModule(menu1);
+			//PopulateProfile(dialogWindow);
+			//SaveLayout(dialogWindow);
+			/*
+			SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)"From Profile");
+			SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)"Right Eye");
+			SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_ADDSTRING, 0, (LPARAM)"Left Eye");
+			SendDlgItemMessageA(dialogWindow, IDC_LIST1, LB_SETCURSEL, 0, (LPARAM)0);
+			*/
+			return TRUE; 
 
-		case ID_CALIB_LOADED: // calibration was loaded
-			if (modeWork != mode_record)
-			InitCalibWindows(mode_live);
 			break;
 
-		case ID_CALIB_DONE: // calibration was completed
-			
-			isPaused = true;
+		case WM_COMMAND:
+			/*
+			// Device Menu handle
+			menu2 = GetSubMenu(menu1, 0);
 
-			CloseCalibWindows();
+			if (LOWORD(wParam) >= ID_DEVICEX && LOWORD(wParam) < ID_DEVICEX + GetMenuItemCount(menu2)) {
 
-			if (calib_status == LOAD_CALIBRATION_ERROR) {
-
-				MessageBoxA(g_hWnd, "Load calibration failed, data invalid", "Calibration Load status ", MB_OK | MB_ICONINFORMATION);
-				InitCalibWindows(mode_calib);
-				isPaused = false;
-				break;
+				CheckMenuRadioItem(menu2, 0, GetMenuItemCount(menu2), LOWORD(wParam) - ID_DEVICEX, MF_BYPOSITION);	
+				deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
+				bool disable = (wcsstr(deviceName, L"R200") != NULL || wcsstr(deviceName, L"DS4") != NULL);
+				DisableUnsupportedAlgos(dialogWindow, disable);
+				return TRUE;
 
 			}
+			*/
+
+			/*
+			// Module menu handle
+			menu2 = GetSubMenu(menu1, 1);
+
+			if (LOWORD(wParam) >= ID_MODULEX && LOWORD(wParam) < ID_MODULEX + GetMenuItemCount(menu2)) {
+
+				CheckMenuRadioItem(menu2, 0, GetMenuItemCount(menu2), LOWORD(wParam) - ID_MODULEX,MF_BYPOSITION);
+				PopulateProfile(dialogWindow);
+				return TRUE;
+
+			}
+
+			menu2 = GetSubMenu(menu1, 2);
+			// Profile Menu handle
+			if (LOWORD(wParam) >= ID_PROFILEX && LOWORD(wParam) < ID_PROFILEX + GetMenuItemCount(menu2)) {
+
+				CheckMenuRadioItem(menu2, 0, GetMenuItemCount(menu2), LOWORD(wParam) - ID_PROFILEX,MF_BYPOSITION);
+				HWND hwndTab = GetDlgItem(dialogWindow, IDC_TAB);
+			
+				if(FaceTrackingUtilities::GetCheckedProfile(dialogWindow) == PXCFaceConfiguration::FACE_MODE_COLOR)	{
+
+					renderer->SetRendererType(FaceTrackingRenderer::R2D);
+
+				} else if(TabCtrl_GetCurSel(hwndTab) == 1) {
+
+					renderer->SetRendererType(FaceTrackingRenderer::R3D);
+
+				}
+
+				return TRUE;
+			
+			}
+			*/
+			switch (LOWORD(wParam_)) {
+
+				case IDCANCEL:
+
+					isStopped = true;
+
+					if (isRunning) {
+
+						PostMessage(dialogWindow_, WM_COMMAND, IDCANCEL, 0);
+
+					} else {
+
+						DestroyWindow(dialogWindow_); 
+						PostQuitMessage(0);
+
+					}
+
+					return TRUE;
+
+				case ID_CALIB_LOADED: // calibration was loaded
+					//if (modeWork != mode_record)
+					InitCalibWindows(mode_live);
+					break;
+
+				case ID_CALIB_DONE: // calibration was completed
+			
+					isPaused = true;
+
+					CloseCalibWindows();
+
+					if (calib_status == LOAD_CALIBRATION_ERROR) {
+
+						MessageBoxA(g_hWnd, "Load calibration failed, data invalid", "Calibration Load status ", MB_OK | MB_ICONINFORMATION);
+						InitCalibWindows(mode_calib);
+						isPaused = false;
+						break;
+
+					}
 	
-			if (calib_status == 3) {
+					if (calib_status == 3) {
 
-				MessageBoxA(g_hWnd, "Please repeat while being in front of the camera and observing the points.",
-					"Calibration Required", MB_OK | MB_ICONINFORMATION);
+						MessageBoxA(g_hWnd, "Please repeat while being in front of the camera and observing the points.",
+							"Calibration Required", MB_OK | MB_ICONINFORMATION);
 
-				calibBuffer = NULL;
-				calibBuffersize = 0;
-				isLoadCalibFile = false;
-				PostMessage(g_hWnd, WM_COMMAND, ID_STOP, 0);
+						calibBuffer = NULL;
+						calibBuffersize = 0;
+						isLoadCalibFile = false;
+						PostMessage(g_hWnd, WM_COMMAND, ID_STOP, 0);
 
-			} else {
+					} else {
 
-				if (DialogBox(g_hInstance, MAKEINTRESOURCE(IDD_CALIB_DIALOG), g_hWnd, (DLGPROC)ResultsProc)) {
+						if (DialogBox(g_hInstance, MAKEINTRESOURCE(IDD_CALIB_DIALOG), g_hWnd, (DLGPROC)ResultsProc)) {
 
-					if (calibBuffer) {
+							if (calibBuffer) {
 
-						// save this data
+								// save this data
 
-						WCHAR temp[max_path_length];
-						WCHAR buff[max_path_length];
+								WCHAR temp[max_path_length];
+								WCHAR buff[max_path_length];
 
-						GetTempPath(max_path_length, temp);
-						wsprintf(buff, L"%s%s.bin", temp, m_Username);
+								GetTempPath(max_path_length, temp);
+								wsprintf(buff, L"%s%s.bin", temp, m_Username);
 
-						FILE* my_file;
-						errno_t err;
+								FILE* my_file;
+								errno_t err;
 							
-						err = _wfopen_s(&my_file, buff, L"wb");
+								err = _wfopen_s(&my_file, buff, L"wb");
 
-						if (my_file) {
+								if (my_file) {
 
-							fwrite(calibBuffer, calibBuffersize, sizeof(pxcBYTE), my_file);
-							fclose(my_file);
+									fwrite(calibBuffer, calibBuffersize, sizeof(pxcBYTE), my_file);
+									fclose(my_file);
+
+								}
+
+							}
+				
+							InitCalibWindows(mode_live);
+
+						} else { // repeat calibration
+			
+							// stop calibration threat
+
+							isPaused = false;
+							isStopped = true;
+							Sleep(1000);
+
+							// start new thread
+
+							isStopped = false;
+							isRunning = true;
+
+							InitCalibWindows(mode_calib);
+
+							if (processor) delete processor;
+							processor = new Processor(dialogWindow_);
+							CreateThread(0, 0, ProcessingThread, dialogWindow_, 0, 0);
+
+							return TRUE;
 
 						}
 
 					}
-				
-					InitCalibWindows(mode_live);
-
-				} else { // repeat calibration
 			
-					// stop calibration threat
-
 					isPaused = false;
-					isStopped = true;
-					Sleep(1000);
+					break;
 
-					// start new thread
+				case ID_LOAD_CALIB: // load calibration file or force a new one
+					isLoadCalibFile = GetCalibFile();
+					Button_Enable(GetDlgItem(dialogWindow_, ID_START), m_CalibFilename[0] != 0);
+					break;
+
+				case ID_NEW_CALIB: // start new calibration
+
+					delete [] calibBuffer;
+					calibBuffer = NULL;
+					calibBuffersize = 0;
+					isLoadCalibFile = false;
+
+				case ID_START:
+
+					Button_Enable(GetDlgItem(dialogWindow_, ID_LOAD_CALIB), false);
+					Button_Enable(GetDlgItem(dialogWindow_, ID_NEW_CALIB), false);
+					Button_Enable(GetDlgItem(dialogWindow_, ID_START), false);
+					Button_Enable(GetDlgItem(dialogWindow_, ID_STOP), true);
+
+					//dominant_eye = SendMessage(GetDlgItem(dialogWindow, IDC_LIST1), LB_GETCURSEL, (WPARAM)0 , (LPARAM)0);
+
+					// Greys menu bar
+					for (int i = 0;i < GetMenuItemCount(menu1); ++i)
+						EnableMenuItem(menu1, i, MF_BYPOSITION | MF_GRAYED);
+			
+					DrawMenuBar(dialogWindow_);
 
 					isStopped = false;
 					isRunning = true;
 
-					InitCalibWindows(mode_calib);
+					// init the calibration windows
+
+					if (isLoadCalibFile == false && calibBuffersize == 0) {
+
+						InitCalibWindows(mode_calib);
+					/*
+					} else if (GetMenuState(GetMenu(dialogWindow_), ID_MODE_RECORD, MF_BYCOMMAND) & MF_CHECKED) {
+
+						InitCalibWindows(mode_record);
+					*/
+					} else if (GetMenuState(GetMenu(dialogWindow_), ID_MODE_PLAYBACK, MF_BYCOMMAND) & MF_CHECKED) {
+
+						InitCalibWindows(mode_playback);
+
+					} else {
+
+						InitCalibWindows(mode_live);
+
+					}
 
 					if (processor) delete processor;
+
 					processor = new Processor(dialogWindow_);
 					CreateThread(0, 0, ProcessingThread, dialogWindow_, 0, 0);
+			
+					/*
+					Button_Enable(GetDlgItem(dialogWindow, IDC_LOCATION), false);
+					Button_Enable(GetDlgItem(dialogWindow, IDC_LANDMARK), false);
+					Button_Enable(GetDlgItem(dialogWindow, IDC_POSE), false);
+					*/
+					Sleep(0); //TODO: remove
+					return TRUE;
+
+				case ID_STOP:
+
+					isStopped = true;
+					CloseCalibWindows();
+
+					if (isRunning) {
+
+						PostMessage(dialogWindow_, WM_COMMAND, ID_STOP, 0);
+						CloseCalibWindows();
+
+					} else {
+						// Enables menu bar
+						for (int i = 0; i < GetMenuItemCount(menu1); ++i)
+							EnableMenuItem(menu1, i, MF_BYPOSITION | MF_ENABLED);
+				
+						DrawMenuBar(dialogWindow_);
+				
+						Button_Enable(GetDlgItem(dialogWindow_, ID_START), true);
+						Button_Enable(GetDlgItem(dialogWindow_, ID_STOP), false);
+						//Button_Enable(GetDlgItem(dialogWindow, IDC_LOCATION), true);
+						//Button_Enable(GetDlgItem(dialogWindow, IDC_LANDMARK), true);
+						Button_Enable(GetDlgItem(dialogWindow_, ID_LOAD_CALIB), true);
+						Button_Enable(GetDlgItem(dialogWindow_, ID_NEW_CALIB), true);
+
+						/*
+						deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
+						bool disable = (wcsstr(deviceName, L"R200") != NULL || wcsstr(deviceName, L"DS4") != NULL);
+						DisableUnsupportedAlgos(dialogWindow, disable);			
+						*/
+					}
 
 					return TRUE;
 
-				}
+				case ID_MODE_LIVE:
 
-			}
-			
-			isPaused = false;
-			break;
+					CheckMenuItem(menu1, ID_MODE_LIVE, MF_CHECKED);
+					CheckMenuItem(menu1, ID_MODE_PLAYBACK, MF_UNCHECKED);
+					//CheckMenuItem(menu1, ID_MODE_RECORD, MF_UNCHECKED);
+					return TRUE;
 
-		case ID_LOAD_CALIB: // load calibration file or force a new one
-			isLoadCalibFile = GetCalibFile();
-			Button_Enable(GetDlgItem(dialogWindow_, ID_START), m_CalibFilename[0] != 0);
-			break;
+				case ID_MODE_PLAYBACK:
 
-		case ID_NEW_CALIB: // start new calibration
-
-			delete [] calibBuffer;
-			calibBuffer = NULL;
-			calibBuffersize = 0;
-			isLoadCalibFile = false;
-
-		case ID_START:
-
-			Button_Enable(GetDlgItem(dialogWindow_, ID_LOAD_CALIB), false);
-			Button_Enable(GetDlgItem(dialogWindow_, ID_NEW_CALIB), false);
-			Button_Enable(GetDlgItem(dialogWindow_, ID_START), false);
-			Button_Enable(GetDlgItem(dialogWindow_, ID_STOP), true);
-
-			//dominant_eye = SendMessage(GetDlgItem(dialogWindow, IDC_LIST1), LB_GETCURSEL, (WPARAM)0 , (LPARAM)0);
-
-			// Greys menu bar
-			for (int i = 0;i < GetMenuItemCount(menu1); ++i)
-				EnableMenuItem(menu1, i, MF_BYPOSITION | MF_GRAYED);
-			
-			DrawMenuBar(dialogWindow_);
-
-			isStopped = false;
-			isRunning = true;
-
-			// init the calibration windows
-
-			if (isLoadCalibFile == false && calibBuffersize == 0) {
-
-				InitCalibWindows(mode_calib);
-			} else if (GetMenuState(GetMenu(dialogWindow_), ID_MODE_RECORD, MF_BYCOMMAND) & MF_CHECKED) {
-
-				InitCalibWindows(mode_record);
-			} else if (GetMenuState(GetMenu(dialogWindow_), ID_MODE_PLAYBACK, MF_BYCOMMAND) & MF_CHECKED) {
-
-				InitCalibWindows(mode_playback);
-
-			} else {
-
-				InitCalibWindows(mode_live);
-
-			}
-
-			if (processor) delete processor;
-
-			processor = new Processor(dialogWindow_);
-			CreateThread(0, 0, ProcessingThread, dialogWindow_, 0, 0);
-			
-			/*
-			Button_Enable(GetDlgItem(dialogWindow, IDC_LOCATION), false);
-			Button_Enable(GetDlgItem(dialogWindow, IDC_LANDMARK), false);
-			Button_Enable(GetDlgItem(dialogWindow, IDC_POSE), false);
-			*/
-			Sleep(0); //TODO: remove
-			return TRUE;
-
-		case ID_STOP:
-
-			isStopped = true;
-			CloseCalibWindows();
-
-			if (isRunning) {
-
-				PostMessage(dialogWindow_, WM_COMMAND, ID_STOP, 0);
-				CloseCalibWindows();
-
-			} else {
-				// Enables menu bar
-				for (int i = 0; i < GetMenuItemCount(menu1); ++i)
-					EnableMenuItem(menu1, i, MF_BYPOSITION | MF_ENABLED);
-				
-				DrawMenuBar(dialogWindow_);
-				
-				Button_Enable(GetDlgItem(dialogWindow_, ID_START), true);
-				Button_Enable(GetDlgItem(dialogWindow_, ID_STOP), false);
-				//Button_Enable(GetDlgItem(dialogWindow, IDC_LOCATION), true);
-				//Button_Enable(GetDlgItem(dialogWindow, IDC_LANDMARK), true);
-				Button_Enable(GetDlgItem(dialogWindow_, ID_LOAD_CALIB), true);
-				Button_Enable(GetDlgItem(dialogWindow_, ID_NEW_CALIB), true);
-
+					CheckMenuItem(menu1, ID_MODE_LIVE, MF_UNCHECKED);
+					CheckMenuItem(menu1, ID_MODE_PLAYBACK, MF_CHECKED);
+					//CheckMenuItem(menu1, ID_MODE_RECORD, MF_UNCHECKED);
+					GetPlaybackFile();
+					return TRUE;
 				/*
-				deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
-				bool disable = (wcsstr(deviceName, L"R200") != NULL || wcsstr(deviceName, L"DS4") != NULL);
-				DisableUnsupportedAlgos(dialogWindow, disable);			
+				case ID_MODE_RECORD:
+
+					CheckMenuItem(menu1, ID_MODE_LIVE, MF_UNCHECKED);
+					CheckMenuItem(menu1, ID_MODE_PLAYBACK, MF_UNCHECKED);
+					CheckMenuItem(menu1, ID_MODE_RECORD, MF_CHECKED);
+					GetRecordFile();
+					return TRUE;
 				*/
-			}
 
+		case WM_SIZE:
+			RedoLayout(dialogWindow_);
 			return TRUE;
 
-		case ID_MODE_LIVE:
-
-			CheckMenuItem(menu1, ID_MODE_LIVE, MF_CHECKED);
-			CheckMenuItem(menu1, ID_MODE_PLAYBACK, MF_UNCHECKED);
-			CheckMenuItem(menu1, ID_MODE_RECORD, MF_UNCHECKED);
-			return TRUE;
-
-		case ID_MODE_PLAYBACK:
-
-			CheckMenuItem(menu1, ID_MODE_LIVE, MF_UNCHECKED);
-			CheckMenuItem(menu1, ID_MODE_PLAYBACK, MF_CHECKED);
-			CheckMenuItem(menu1, ID_MODE_RECORD, MF_UNCHECKED);
-			GetPlaybackFile();
-			return TRUE;
-
-		case ID_MODE_RECORD:
-
-			CheckMenuItem(menu1, ID_MODE_LIVE, MF_UNCHECKED);
-			CheckMenuItem(menu1, ID_MODE_PLAYBACK, MF_UNCHECKED);
-			CheckMenuItem(menu1, ID_MODE_RECORD, MF_CHECKED);
-			GetRecordFile();
-			return TRUE;
-
-		} 
-		break;
-
-	case WM_SIZE:
-		RedoLayout(dialogWindow_);
-		return TRUE;
-
-    case WM_ACTIVATEAPP:
-        isActiveApp = wParam_ != 0;
-        break;
-	/*
-	case WM_NOTIFY:
+		case WM_ACTIVATEAPP:
+			isActiveApp = wParam_ != 0;
+			break;
+		/*
+		case WM_NOTIFY:
 		
-		switch (((LPNMHDR)lParam)->code) {
+			switch (((LPNMHDR)lParam)->code) {
 			
-		case TCN_SELCHANGE:
-			{ 
-				HWND hwndTab = GetDlgItem(dialogWindow, IDC_TAB);
-				//int iPage = TabCtrl_GetCurSel(hwndTab);
-				//deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
+				case TCN_SELCHANGE: 
+						HWND hwndTab = GetDlgItem(dialogWindow, IDC_TAB);
+						//int iPage = TabCtrl_GetCurSel(hwndTab);
+						//deviceName = FaceTrackingUtilities::GetCheckedDevice(dialogWindow);
 				
 				
-				if (iPage == 0) {
-					renderer->SetRendererType(FaceTrackingRenderer::R2D);
-				}
+						if (iPage == 0) {
+							renderer->SetRendererType(FaceTrackingRenderer::R2D);
+						}
 				
-				if (iPage == 0 && wcsstr(deviceName, L"3D") != NULL &&
-					FaceTrackingUtilities::GetCheckedProfile(dialogWindow) == PXCFaceConfiguration::FACE_MODE_COLOR_PLUS_DEPTH) {
+						if (iPage == 0 && wcsstr(deviceName, L"3D") != NULL &&
+							FaceTrackingUtilities::GetCheckedProfile(dialogWindow) == PXCFaceConfiguration::FACE_MODE_COLOR_PLUS_DEPTH) {
 
-					renderer->SetRendererType(FaceTrackingRenderer::R3D);
-				}
+							renderer->SetRendererType(FaceTrackingRenderer::R3D);
+						}
 				
-				if (wcsstr(deviceName, L"3D") != NULL) {
+						if (wcsstr(deviceName, L"3D") != NULL) {
 
-					renderer->SetRendererType(FaceTrackingRenderer::R3D);
-				}
-				return TRUE;
-			} 
+							renderer->SetRendererType(FaceTrackingRenderer::R3D);
+						}
 
-		}
-		break;
-	*/
+						return TRUE; 
+
+			}
+			break;
+		*/
 	} 
 
 	return FALSE; 
-
 } 
 /*
 HWND CreateTabControl(HWND hWnd, HINSTANCE hInstance)
