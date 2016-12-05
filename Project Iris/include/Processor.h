@@ -9,10 +9,10 @@ class PXCFaceData;
 #define LOAD_CALIBRATION_ERROR 5
 #define NO_DETECTION_FOR_LONG 20
 
-class FaceTrackingProcessor
+class Processor
 {
 public:
-	FaceTrackingProcessor(HWND window);
+	Processor(HWND window);
 	void Process(HWND dialogWindow);
 	void RegisterUser();
 	void UnregisterUser();

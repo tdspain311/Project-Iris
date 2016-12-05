@@ -8,19 +8,19 @@
 #include <map>
 #include "resource.h"
 #include "pxcfacedata.h"
-#include "FaceTrackingFrameRateCalculator.h"
+#include "FPSCalculator.h"
 #include "pxcsensemanager.h"
 
 typedef void (*OnFinishedRenderingCallback)();
 
 class PXCImage;
 
-class FaceTrackingRenderer
+class Renderer
 {
 public:
 	enum RendererType { R2D, R3D };
-	FaceTrackingRenderer(HWND window);
-	virtual ~FaceTrackingRenderer();
+	Renderer(HWND window);
+	virtual ~Renderer();
 
 	void SetNumberOfLandmarks(int numLandmarks);
 	void SetOutput(PXCFaceData* output);
@@ -34,9 +34,8 @@ protected:
 	int m_numLandmarks;
 	PXCFaceData* m_currentFrameOutput;
 	PXCSenseManager* m_senseManager;
-	FaceTrackingFrameRateCalculator m_frameRateCalcuator;
+	FPSCalculator m_frameRateCalcuator;
 	PXCFaceData::LandmarkPoint* m_landmarkPoints;
-	std::map<PXCFaceData::ExpressionsData::FaceExpression, std::wstring> m_expressionMap;
 
 	HWND m_window;
 	HBITMAP m_bitmap;
@@ -46,5 +45,4 @@ protected:
 	void DrawFrameRate();
 	void RefreshUserInterface();
 	RECT GetResizeRect(RECT rectangle, BITMAP bitmap);
-	std::map<PXCFaceData::ExpressionsData::FaceExpression, std::wstring> InitExpressionsMap();
 };

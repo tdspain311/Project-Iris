@@ -1,23 +1,23 @@
-#include "FaceTrackingFrameRateCalculator.h"
+#include "FPSCalculator.h"
 
-FaceTrackingFrameRateCalculator::FaceTrackingFrameRateCalculator() : frameRate(0), currentlyCalclatedFrameRate(0), currentTime(), isFrameRateReady(false)
+FPSCalculator::FPSCalculator() : frameRate(0), currentlyCalclatedFrameRate(0), currentTime(), isFrameRateReady(false)
 {
 	QueryPerformanceCounter(&previousTime);
 	QueryPerformanceFrequency(&frequency);
 }
 
-bool FaceTrackingFrameRateCalculator::IsFrameRateReady()
+bool FPSCalculator::IsFrameRateReady()
 {
 	return isFrameRateReady;
 }
 
-int FaceTrackingFrameRateCalculator::GetFrameRate()
+int FPSCalculator::GetFrameRate()
 {
 	isFrameRateReady = false;
 	return frameRate;
 }
 
-void FaceTrackingFrameRateCalculator::Tick()
+void FPSCalculator::Tick()
 {
 	QueryPerformanceCounter(&currentTime);
 	++currentlyCalclatedFrameRate;

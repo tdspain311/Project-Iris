@@ -1,14 +1,14 @@
 #pragma once
 
 #include <memory>
-#include "FaceTrackingRenderer.h"
+#include "Renderer.h"
 #include "service/pxcsessionservice.h"
 
-class FaceTrackingRenderer3D : public FaceTrackingRenderer
+class Graphics : public Renderer
 {
 public:
-	FaceTrackingRenderer3D(HWND window, PXCSession* session);
-	virtual ~FaceTrackingRenderer3D();
+	Graphics(HWND window, PXCSession* session);
+	virtual ~Graphics();
 
 	void DrawBitmap(PXCCapture::Sample* sample);
 
@@ -16,7 +16,6 @@ private:
 	void DrawGraphics(PXCFaceData* faceOutput);
 	void DrawLandmark(PXCFaceData::Face* trackedFace);
 	bool ProjectVertex(const PXCPoint3DF32 &v, int &x, int &y, int radius = 0);
-	void CalcCenterOfMass(PXCFaceData::LandmarkPoint &centerOfMass,PXCFaceData::LandmarkPoint* points);
 	void DrawPose(PXCFaceData::Face* trackedFace);
 
 	PXCSession* m_session;
