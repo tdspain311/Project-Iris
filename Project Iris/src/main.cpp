@@ -295,55 +295,50 @@ void UpdateTracking() {
 		else
 		{
 			// Gaze position
-			//SetWindowPos(g_hWndEyePoint, NULL, eye_point_x - width / 2, eye_point_y - height / 2, width, height, NULL);
+			RECT wrc;
+			HWND hDesktop = GetDesktopWindow();
+			GetWindowRect(hDesktop, &wrc);
 
-			if (DEBUG)
-			{
-				RECT wrc;
-				HWND hDesktop = GetDesktopWindow();
-				GetWindowRect(hDesktop, &wrc);
-
-				HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 				
-				//SetConsoleTextAttribute(hConsole, 15);
-				//std::cout << "Window (Top, Right, Bottom, Left): " << wrc.top << ", " << wrc.right << ", " << wrc.bottom << ", " << wrc.left << std::endl;
-
-				if ((eye_horizontal_angle >= -MAX_ANGLE && eye_horizontal_angle <= MAX_ANGLE) &&
-					(eye_vertical_angle >= -MAX_ANGLE && eye_vertical_angle <= MAX_ANGLE))
+			if ((eye_horizontal_angle >= -MAX_ANGLE && eye_horizontal_angle <= MAX_ANGLE) &&
+				(eye_vertical_angle >= -MAX_ANGLE && eye_vertical_angle <= MAX_ANGLE))
+			{
+				if ((eye_point_x <= wrc.right) && (eye_point_x >= wrc.left) &&
+					(eye_point_y <= wrc.bottom) && (eye_point_y >= wrc.top))
 				{
-					if ((eye_point_x <= wrc.right) && (eye_point_x >= wrc.left) &&
-						(eye_point_y <= wrc.bottom) && (eye_point_y >= wrc.top))
-					{
-						// Trivial Accept
-						SetConsoleTextAttribute(hConsole, 15);
-						std::cout << "Gaze Position X: " << eye_point_x << " || Y: " << eye_point_y << " Horizontal Angle: " << eye_horizontal_angle << " || Vertical Angle: " << eye_vertical_angle << std::endl;
-					}
-					else
-					{
-						// Modify to Accept
-						SetConsoleTextAttribute(hConsole, 14);
-						std::cout << "Gaze Position X: " << eye_point_x << " || Y: " << eye_point_y << " Horizontal Angle: " << eye_horizontal_angle << " || Vertical Angle: " << eye_vertical_angle << std::endl;
-						if (eye_point_x > wrc.right) // 1920
-							eye_point_x = wrc.right - width;
-						if (eye_point_x < wrc.left) // 0
-							eye_point_x = wrc.left + width;
-						if (eye_point_y > wrc.bottom) // 1080
-							eye_point_y = wrc.bottom - height;
-						if (eye_point_y < wrc.top) // 0
-							eye_point_y = wrc.top + height;
-					}
-					gaze_point_x = eye_point_x;
-					gaze_point_y = eye_point_y;
+					// Trivial Accept
+					SetConsoleTextAttribute(hConsole, 15);
+					std::cout << "Gaze Position (x, y): " << eye_point_x << ", " << eye_point_y << " || Angle (horizontal, vertical): " << eye_horizontal_angle << ", " << eye_vertical_angle << std::endl;
 				}
 				else
 				{
-					// Trivial Reject
-					SetConsoleTextAttribute(hConsole, 4);
-					std::cout << "Gaze Position X: " << eye_point_x << " || Y: " << eye_point_y << " Horizontal Angle: " << eye_horizontal_angle << " || Vertical Angle: " << eye_vertical_angle << std::endl;
+					// Modify to Accept
+					SetConsoleTextAttribute(hConsole, 14);
+					std::cout << "Gaze Position (x, y): " << eye_point_x << ", " << eye_point_y << " || Angle (horizontal, vertical): " << eye_horizontal_angle << ", " << eye_vertical_angle << std::endl;
+					
+					if (eye_point_x > wrc.right) // 1920
+						eye_point_x = wrc.right - width;
+					if (eye_point_x < wrc.left) // 0
+						eye_point_x = wrc.left + width;
+					if (eye_point_y > wrc.bottom) // 1080
+						eye_point_y = wrc.bottom - height;
+					if (eye_point_y < wrc.top) // 0
+						eye_point_y = wrc.top + height;
 				}
-				//SetCursorPos(gaze_point_x, gaze_point_y);
-				SetWindowPos(g_hWndEyePoint, NULL, gaze_point_x, gaze_point_y, width, height, NULL);
+				gaze_point_x = eye_point_x;
+				gaze_point_y = eye_point_y;
 			}
+			else
+			{
+				// Trivial Reject
+				SetConsoleTextAttribute(hConsole, 4);
+				std::cout << "Gaze Position (x, y): " << eye_point_x << ", " << eye_point_y << " || Angle (horizontal, vertical): " << eye_horizontal_angle << ", " << eye_vertical_angle << std::endl;
+			}
+			if (GetMenuState(GetSubMenu(GetMenu(g_hWnd), 1), ID_ALWAYSON_MOUSE, MF_BYCOMMAND) & MF_CHECKED)
+				SetCursorPos(gaze_point_x, gaze_point_y);
+			else if (GetMenuState(GetSubMenu(GetMenu(g_hWnd), 1), ID_ALWAYSON_GPI, MF_BYCOMMAND) & MF_CHECKED)
+				SetWindowPos(g_hWndEyePoint, NULL, gaze_point_x, gaze_point_y, width, height, NULL);
 		}
 	}
 }
@@ -1230,6 +1225,21 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 					GetRecordFile();
 					return TRUE;
 				*/
+				case ID_ALWAYSON_GPI:
+					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_GPI, MF_CHECKED);
+					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_MOUSE, MF_UNCHECKED);
+					break;
+				case ID_ALWAYSON_MOUSE:
+					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_MOUSE, MF_CHECKED);
+					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_GPI, MF_UNCHECKED);
+					break;
+				case ID_HOTKEY_ASSIGNED:
+					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_MOUSE, MF_UNCHECKED);
+					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_GPI, MF_UNCHECKED);
+					CheckMenuItem(GetSubMenu(menu1, 1), ID_HOTKEY_ASSIGNED, MF_CHECKED);
+					break;
+				} 
+			break;
 
 		case WM_SIZE:
 			RedoLayout(dialogWindow_);
