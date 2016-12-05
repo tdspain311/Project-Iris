@@ -36,7 +36,6 @@ protected:
 	PXCSenseManager* m_senseManager;
 	FPSCalculator m_frameRateCalcuator;
 	PXCFaceData::LandmarkPoint* m_landmarkPoints;
-	std::map<PXCFaceData::ExpressionsData::FaceExpression, std::wstring> m_expressionMap;
 
 	HWND m_window;
 	HBITMAP m_bitmap;
@@ -46,5 +45,4 @@ protected:
 	void DrawFrameRate();
 	void RefreshUserInterface();
 	RECT GetResizeRect(RECT rectangle, BITMAP bitmap);
-	std::map<PXCFaceData::ExpressionsData::FaceExpression, std::wstring> InitExpressionsMap();
 };

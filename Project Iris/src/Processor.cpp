@@ -43,7 +43,6 @@ const BOOL DEBUG = TRUE;
 Processor::Processor(HWND window) : m_window(window), m_registerFlag(false), m_unregisterFlag(false) {
 
 	// constructor
-
 }
 
 void Processor::PerformRegistration()
@@ -77,28 +76,11 @@ void Processor::CheckForDepthStream(PXCSenseManager* pp, HWND hwndDlg)
 
 	PXCFaceConfiguration::TrackingModeType trackingMode = config->GetTrackingMode();
 	config->Release();
-	
-	/*
-	// Checks devices in profile for depth stream
-	if (trackingMode == PXCFaceConfiguration::FACE_MODE_COLOR_PLUS_DEPTH)
-	{
-		PXCCapture::Device::StreamProfileSet profiles={};
-		pp->QueryCaptureManager()->QueryDevice()->QueryStreamProfileSet(&profiles);
-		if (!profiles.depth.imageInfo.format)
-		{            
-			std::wstring msg = L"Depth stream is not supported for device: ";
-			msg.append(FaceTrackingUtilities::GetCheckedDevice(hwndDlg));           
-			msg.append(L". \nUsing 2D tracking");
-			MessageBox(hwndDlg, msg.c_str(), L"Face Tracking", MB_OK);            
-		}
-	}
-	*/
 }
 
 void Processor::Process(HWND dialogWindow) {
 
 	// set startup mode
-
 	PXCSenseManager* senseManager = session->CreateSenseManager();
 
 	if (senseManager == NULL) {
@@ -109,7 +91,6 @@ void Processor::Process(HWND dialogWindow) {
 	}
 
 	/* Set Mode & Source */
-
 	PXCCaptureManager* captureManager = senseManager->QueryCaptureManager();
 
 	pxcStatus status = PXC_STATUS_NO_ERROR;
@@ -164,7 +145,6 @@ void Processor::Process(HWND dialogWindow) {
 	}
 
 	// set tracking mode
-	//config->SetTrackingMode(FaceTrackingUtilities::GetCheckedProfile(dialogWindow));
 	config->SetTrackingMode(PXCFaceConfiguration::TrackingModeType::FACE_MODE_COLOR_PLUS_DEPTH);
 	config->ApplyChanges();
 
@@ -195,7 +175,6 @@ void Processor::Process(HWND dialogWindow) {
 			if (st != PXC_STATUS_NO_ERROR) {
 
 				// get save file name
-
 				calib_status = LOAD_CALIBRATION_ERROR;
 				need_calibration = false;
 				PostMessage(dialogWindow, WM_COMMAND, ID_CALIB_DONE, 0);
@@ -212,14 +191,12 @@ void Processor::Process(HWND dialogWindow) {
 	} else if (calibBuffer) {
 
 		// load existing calib stored in memory
-
 		config->QueryGaze()->LoadCalibration(calibBuffer, calibBuffersize);
 		need_calibration = false;
 
 	}
 
 	// init sense manager
-
 	if (senseManager->Init() < PXC_STATUS_NO_ERROR) {
 
 		captureManager->FilterByStreamProfiles(NULL);
@@ -239,13 +216,6 @@ void Processor::Process(HWND dialogWindow) {
 
     CheckForDepthStream(senseManager, dialogWindow);
     AlertHandler alertHandler(dialogWindow);
-
-	// Enables checkbox options
-    //if (FaceTrackingUtilities::GetCheckedModule(dialogWindow)) {
-
-        //config->detection.isEnabled = FaceTrackingUtilities::IsModuleSelected(dialogWindow, IDC_LOCATION);
-        //config->landmarks.isEnabled = FaceTrackingUtilities::IsModuleSelected(dialogWindow, IDC_LANDMARK);
-        //config->pose.isEnabled = FaceTrackingUtilities::IsModuleSelected(dialogWindow, IDC_POSE);
 
 	config->detection.isEnabled = true;
 	config->landmarks.isEnabled = true;
@@ -281,12 +251,12 @@ void Processor::Process(HWND dialogWindow) {
 	PXCSmoother::Smoother2D* smoother2D = smoother->Create2DQuadratic(1.0f);
 
 	// acquisition loop
-
     if (!isStopped) {
 
         while (true) {
 
-			if (isPaused) { // allow the application to pause for user input
+			if (isPaused) { 
+				// allow the application to pause for user input
 
 				Sleep(200);
 				continue;
@@ -303,7 +273,8 @@ void Processor::Process(HWND dialogWindow) {
 
                 WaitForSingleObject(renderer->GetRenderingFinishedSignal(), INFINITE);
 
-            } else { // enable back window
+            } else { 
+				// enable back window
 
 				if (need_calibration) EnableBackWindow();
 
@@ -322,9 +293,6 @@ void Processor::Process(HWND dialogWindow) {
             PXCCapture::Sample* sample = senseManager->QueryFaceSample();
             isNotFirstFrame = true;
 
-			//PXCCapture::Device *device = captureManager->QueryDevice();
-			//device->SetMirrorMode(PXCCapture::Device::MirrorMode::MIRROR_MODE_HORIZONTAL);
-
             if (sample != NULL) {
 
 				DWORD dwWaitResult;
@@ -333,11 +301,9 @@ void Processor::Process(HWND dialogWindow) {
 				if (dwWaitResult == WAIT_OBJECT_0) {
 
 					// check calibration state
-
 					if (need_calibration) {
 
 						// CALIBRATION FLOW
-
 						if (m_output->QueryNumberOfDetectedFaces()) {
 
 							PXCFaceData::Face* trackedFace = m_output->QueryFaceByIndex(0);
@@ -354,7 +320,6 @@ void Processor::Process(HWND dialogWindow) {
 									PXCPointI32 new_point = trackedFace->QueryGazeCalibration()->QueryCalibPoint();
 									
 									// set the cursor to that point
-
 									eye_point_x = new_point.x;
 									eye_point_y = new_point.y;
 									SetCursorPos(OUT_OF_SCREEN, OUT_OF_SCREEN);
@@ -362,28 +327,26 @@ void Processor::Process(HWND dialogWindow) {
 								} else if (state == PXCFaceData::GazeCalibData::CALIBRATION_DONE) {
 
 									// store calib data in a file
-
 									calibBuffersize = trackedFace->QueryGazeCalibration()->QueryCalibDataSize();
 									if (calibBuffer == NULL) calibBuffer = new unsigned char[calibBuffersize];
 									calib_status = trackedFace->QueryGazeCalibration()->QueryCalibData(calibBuffer);
 									dominant_eye = trackedFace->QueryGazeCalibration()->QueryCalibDominantEye();
 
 									// get save file name
-
 									PostMessage(dialogWindow, WM_COMMAND, ID_CALIB_DONE, 0);
 									need_calibration = false;
 
 								} else  if (state == PXCFaceData::GazeCalibData::CALIBRATION_IDLE) {
 
 									// set the cursor beyond the screen
-
 									eye_point_x = OUT_OF_SCREEN;
 									eye_point_y = OUT_OF_SCREEN;
 									SetCursorPos(OUT_OF_SCREEN, OUT_OF_SCREEN);
 
 								}
 
-							} else { // gaze not enabled stop processing
+							} else { 
+								// gaze not enabled stop processing
 
 								need_calibration = false;
 								PostMessage(dialogWindow, WM_COMMAND, ID_STOP, 0);
@@ -392,7 +355,8 @@ void Processor::Process(HWND dialogWindow) {
 
 						} else {
 
-							failed_counter++; // wait 20 frames , if no detection happens go to failed mode
+							failed_counter++; 
+							// wait 20 frames , if no detection happens go to failed mode
 
 							if (failed_counter > NO_DETECTION_FOR_LONG) {
 
@@ -407,13 +371,11 @@ void Processor::Process(HWND dialogWindow) {
 					} else {
 
 						// GAZE PROCESSING AFTER CALIBRATION IS DONE
-
 						if (m_output->QueryNumberOfDetectedFaces()) {
 
 							PXCFaceData::Face* trackedFace = m_output->QueryFaceByIndex(0);
 							
 							// get gaze point
-
 							if (trackedFace != NULL) {
 
 								if (trackedFace->QueryGaze()) {
@@ -428,7 +390,6 @@ void Processor::Process(HWND dialogWindow) {
 									// Smoothing
 									PXCPointF32 smoothed2DPoint = smoother2D->SmoothValue(new_point);
 
-									// TESTING
 									pxcF64 horizontal_angle = trackedFace->QueryGaze()->QueryGazeHorizontalAngle();
 									pxcF64 vertical_angle = trackedFace->QueryGaze()->QueryGazeVerticalAngle();
 									
@@ -436,14 +397,6 @@ void Processor::Process(HWND dialogWindow) {
 									eye_vertical_angle = (float)vertical_angle;
 									eye_point_x = (int)smoothed2DPoint.x;
 									eye_point_y = (int)smoothed2DPoint.y;
-									/*
-									if (DEBUG)
-									{
-										std::cout << "Raw Gaze Position X: " << gaze_point.screenPoint.x << " || Y: " << gaze_point.screenPoint.y
-											<< " -- Casted Point x: " << new_point.x << " || Y: " << new_point.y
-											<< " -- Smoothed Point X: " << smoothed2DPoint.x << " || Y: " << smoothed2DPoint.y << std::endl;
-									}
-									*/
 								}
 
 							}
@@ -453,7 +406,6 @@ void Processor::Process(HWND dialogWindow) {
 					}
 
 					// render output
-
 					renderer->DrawBitmap(sample);
 					renderer->SetOutput(m_output);
 					renderer->SignalRenderer();
@@ -481,7 +433,6 @@ void Processor::Process(HWND dialogWindow) {
 	config->Release();
 	senseManager->Close(); 
 	senseManager->Release();
-	//device->Release();
 }
 
 void Processor::RegisterUser()

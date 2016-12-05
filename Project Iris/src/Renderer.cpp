@@ -15,7 +15,6 @@ Renderer::Renderer(HWND window) : m_window(window)
 {
 	m_landmarkPoints = NULL;
 	m_senseManager = NULL;
-	//m_expressionMap = InitExpressionsMap();
 }
 
 void Renderer::SetOutput(PXCFaceData* output)
@@ -100,7 +99,6 @@ void Renderer::RefreshUserInterface()
 	BITMAP bm;
 	GetObject(m_bitmap, sizeof(BITMAP), &bm);
 
-	//bool scale = Button_GetState(GetDlgItem(m_window, IDC_SCALE)) & BST_CHECKED;
 	bool scale = true;
 
 	if (scale)
@@ -136,30 +134,6 @@ RECT Renderer::GetResizeRect(RECT rectangle, BITMAP bitmap)
 	resizedRectangle.top = (rectangle.bottom - resizedRectangle.bottom) / 2 + rectangle.top;
 	return resizedRectangle;
 }
-
-/*
-std::map<PXCFaceData::ExpressionsData::FaceExpression, std::wstring> FaceTrackingRenderer::InitExpressionsMap()
-{
-	std::map<PXCFaceData::ExpressionsData::FaceExpression, std::wstring> map;
-	map[PXCFaceData::ExpressionsData::EXPRESSION_SMILE] =  std::wstring(L"Smile");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_MOUTH_OPEN] = std::wstring(L"Mouth Open");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_KISS] = std::wstring(L"Kiss");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_EYES_TURN_LEFT] = std::wstring(L"Eyes Turn Left");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_EYES_TURN_RIGHT] = std::wstring(L"Eyes Turn Right");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_EYES_UP] = std::wstring(L"Eyes Up");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_EYES_DOWN] = std::wstring(L"Eyes Down");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_BROW_RAISER_LEFT] = std::wstring(L"Brow Raised Left");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_BROW_RAISER_RIGHT] = std::wstring(L"Brow Raised Right");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_BROW_LOWERER_LEFT] = std::wstring(L"Brow Lowered Left");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_BROW_LOWERER_RIGHT] = std::wstring(L"Brow Lowered Right");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_EYES_CLOSED_LEFT] = std::wstring(L"Closed Eye Left");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_EYES_CLOSED_RIGHT] = std::wstring(L"Closed Eye Right");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_TONGUE_OUT] = std::wstring(L"Tongue Out");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_PUFF_RIGHT] = std::wstring(L"Puff Right Cheek");
-	map[PXCFaceData::ExpressionsData::EXPRESSION_PUFF_LEFT] = std::wstring(L"Puff Left Cheek");
-	return map;
-}
-*/
 
 void Renderer::SetNumberOfLandmarks(int numLandmarks)
 {

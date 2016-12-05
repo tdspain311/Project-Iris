@@ -16,7 +16,6 @@ private:
 	void DrawGraphics(PXCFaceData* faceOutput);
 	void DrawLandmark(PXCFaceData::Face* trackedFace);
 	bool ProjectVertex(const PXCPoint3DF32 &v, int &x, int &y, int radius = 0);
-	void CalcCenterOfMass(PXCFaceData::LandmarkPoint &centerOfMass,PXCFaceData::LandmarkPoint* points);
 	void DrawPose(PXCFaceData::Face* trackedFace);
 
 	PXCSession* m_session;

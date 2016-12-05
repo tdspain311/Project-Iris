@@ -23,36 +23,7 @@ bool Graphics::ProjectVertex(const PXCPoint3DF32 &v, int &x, int &y, int radius)
 
 	return ((radius <= x) && (x < m_outputImageInfo.width-radius) && (radius <= y) && (y < m_outputImageInfo.height-radius));
 }
-/*
-void FaceTrackingRenderer3D::CalcCenterOfMass(PXCFaceData::LandmarkPoint &centerOfMass,PXCFaceData::LandmarkPoint* points)
-{
-	centerOfMass.world.x = 0.0;
-	centerOfMass.world.y = 0.0;
-	centerOfMass.world.z = 0.0;
 
-	int numStartPointsTodevied = 62;
-	for (int j=0; j<78; j++)
-	{
-		if (j < 53 || j >69 ||j  == 61) 
-		{			
-			if (points[j].confidenceWorld > 0)
-			{
-				centerOfMass.world.x += points[j].world.x;
-				centerOfMass.world.y += points[j].world.y;
-				centerOfMass.world.z += points[j].world.z;
-			}
-			else
-			{
-				numStartPointsTodevied--;
-			}
-		}
-	}
-
-	centerOfMass.world.x /= numStartPointsTodevied;
-	centerOfMass.world.y /= numStartPointsTodevied;
-	centerOfMass.world.z /= numStartPointsTodevied;
-}
-*/
 void Graphics::DrawGraphics(PXCFaceData* faceOutput)
 {
 	assert(faceOutput != NULL);
@@ -63,12 +34,7 @@ void Graphics::DrawGraphics(PXCFaceData* faceOutput)
 	{
 		PXCFaceData::Face* trackedFace = faceOutput->QueryFaceByIndex(i);		
 		assert(trackedFace != NULL);
-		/*
-		if (FaceTrackingUtilities::IsModuleSelected(m_window, IDC_LANDMARK) && trackedFace->QueryLandmarks() != NULL) 
-			DrawLandmark(trackedFace);
-		if (FaceTrackingUtilities::IsModuleSelected(m_window, IDC_POSE))
-			DrawPose(trackedFace);
-		*/
+
 		if (trackedFace->QueryLandmarks() != NULL)
 			DrawLandmark(trackedFace);
 			DrawPose(trackedFace);
@@ -206,10 +172,6 @@ void Graphics::DrawLandmark(PXCFaceData::Face* trackedFace)
 
 	pxcI32 numPoints = landmarkData->QueryNumPoints();
 
-	// TESTING
-	//pxcI32 numLeftEyePoints = landmarkData->QueryNumPointsByGroup(PXCFaceData::LandmarksGroupType::LANDMARK_GROUP_LEFT_EYE);
-	//pxcI32 numRightEyePoints = landmarkData->QueryNumPointsByGroup(PXCFaceData::LandmarksGroupType::LANDMARK_GROUP_RIGHT_EYE);
-
 	if (numPoints != m_numLandmarks)
 	{
 		DeleteObject(hFont);
@@ -219,8 +181,6 @@ void Graphics::DrawLandmark(PXCFaceData::Face* trackedFace)
 	}
 
 	PXCFaceData::LandmarkPoint* points = new PXCFaceData::LandmarkPoint[numPoints];
-	//PXCFaceData::LandmarkPoint* eyeLeftPoints = new PXCFaceData::LandmarkPoint[numLeftEyePoints];
-	//PXCFaceData::LandmarkPoint* eyeRightPoints = new PXCFaceData::LandmarkPoint[numRightEyePoints];
 
 	//initialize Array
 	for (int l = 0; l < numPoints; l++) 
@@ -229,10 +189,6 @@ void Graphics::DrawLandmark(PXCFaceData::Face* trackedFace)
 		points[l].world.y = 0.0;
 		points[l].world.z = 0.0;
 	}
-	// TESTING: Get only eye points
-	//landmarkData->QueryPointsByGroup(PXCFaceData::LandmarksGroupType::LANDMARK_GROUP_LEFT_EYE, eyeLeftPoints);
-	//landmarkData->QueryPointsByGroup(PXCFaceData::LandmarksGroupType::LANDMARK_GROUP_RIGHT_EYE, eyeRightPoints);
-
 	
 	landmarkData->QueryPoints(points);
 
@@ -260,94 +216,8 @@ void Graphics::DrawLandmark(PXCFaceData::Face* trackedFace)
 		}
 	}
 	
-	//PXCFaceData::LandmarkPoint centerOfMass;
-
-	//landmarkData->QueryPoints(points); //data set for all landmarks in frame
-
-
-	//convert depth data is to millimeters
-	/*
-	for (int l = 0; l < numPoints; l++)
-	{
-		points[l].world.x *= 1000.0f;
-		points[l].world.y *= 1000.0f;
-		points[l].world.z *= 1000.0f;
-	}
-	*/
-
-	// TESTING
-	// Project Left Eye group
-	/*
-	for (int l = 0; l < numLeftEyePoints; l++)
-	{
-		eyeLeftPoints[l].world.x *= 1000.0f;
-		eyeLeftPoints[l].world.y *= 1000.0f;
-		eyeLeftPoints[l].world.z *= 1000.0f;
-	}
-
-	for (int i = 0; i < numLeftEyePoints; i++)
-	{
-		int px = 0, py = 0;
-
-		if (ProjectVertex(eyeLeftPoints[i].world, px, py, 1))
-		{
-			if (eyeLeftPoints[i].confidenceWorld > 0)
-			{
-				SetTextColor(dc2, RGB(255, 255, 0));
-				TextOut(dc2, px, py, L"•", 1);
-			}
-		}
-	}
-
-	// Project Left Eye group
-	for (int l = 0; l < numRightEyePoints; l++)
-	{
-		eyeRightPoints[l].world.x *= 1000.0f;
-		eyeRightPoints[l].world.y *= 1000.0f;
-		eyeRightPoints[l].world.z *= 1000.0f;
-	}
-
-	for (int i = 0; i < numRightEyePoints; i++)
-	{
-		int px = 0, py = 0;
-
-		if (ProjectVertex(eyeRightPoints[i].world, px, py, 1))
-		{
-			if (eyeRightPoints[i].confidenceWorld > 0)
-			{
-				SetTextColor(dc2, RGB(255, 255, 0));
-				TextOut(dc2, px, py, L"•", 1);
-			}
-		}
-	}
-	*/
-	/*
-	for (int j = 0; j < numPoints; j++)
-	{
-		int ix = 0, iy = 0;
-
-		if(ProjectVertex(points[j].world, ix, iy, 1))
-		{
-			if (points[j].confidenceWorld > 0)
-			{
-				SetTextColor(dc2, RGB(255, 255, 0));
-				TextOut(dc2, ix, iy, L"•", 1);
-			}
-			else
-			{
-				SetTextColor(dc2, RGB(255, 0, 0));
-				TextOut(dc2, ix, iy, L"x", 1);
-			}
-		}
-	}
-	*/
-	
 	if (points)
-	{
 		delete[] points;
-		//delete[] eyeLeftPoints;
-		//delete[] eyeRightPoints;
-	}
 
 	DeleteObject(hFont);
 	DeleteDC(dc2);
@@ -395,7 +265,6 @@ void Graphics::DrawPose(PXCFaceData::Face* trackedFace)
 	PXCFaceData::HeadPosition outFaceCenterPoint;
 	poseData->QueryHeadPosition(&outFaceCenterPoint);
 
-	// TESTING
 	PXCFaceData::PoseQuaternion poseQuaternion;
 	poseData->QueryPoseQuaternion(&poseQuaternion);
 
@@ -434,13 +303,8 @@ void Graphics::DrawPose(PXCFaceData::Face* trackedFace)
 		landmarkData->QueryPoints(points);
 
 		PXCFaceData::LandmarkPoint nosePoint = points[landmarkData->QueryPointIndex(PXCFaceData::LandmarkType::LANDMARK_NOSE_TIP)];
-		/*
-		points[29].world.x = 0.0;
-		points[29].world.y = 0.0;
-		points[29].world.z = 0.0;
-		*/
-		// Initialize nose point to 0
-		
+
+		// Initialize nose point to 0		
 		nosePoint.world.x = 0.0;
 		nosePoint.world.y = 0.0;
 		nosePoint.world.z = 0.0;
@@ -449,19 +313,13 @@ void Graphics::DrawPose(PXCFaceData::Face* trackedFace)
 		nosePoint.world.x *= 1000.0f;
 		nosePoint.world.y *= 1000.0f;
 		nosePoint.world.z *= 1000.0f;
-		/*
-		points[29].world.x *= 1000.0f;
-		points[29].world.y *= 1000.0f;
-		points[29].world.z *= 1000.0f;
-		*/
+
 		int noseTip_x = 0, noseTip_y = 0;
 
-		//if (ProjectVertex(points[29].world, noseTip_x, noseTip_y, 1))
 		if (ProjectVertex(nosePoint.world, noseTip_x, noseTip_y, 1))
 		{
 			PXCPointI32 direction;
-			//direction.x = headCenter_x - noseTip_x;
-			//direction.y = headCenter_y - noseTip_y;
+
 			direction.x = noseTip_x - headCenter_x;
 			direction.y = noseTip_y - headCenter_y;
 			
@@ -480,26 +338,10 @@ void Graphics::DrawPose(PXCFaceData::Face* trackedFace)
 				return;
 			}
 			SelectObject(dc2, poseLine);
-			/*
-			if (!DEBUG) {
-				std::cout << "Direction X: " << direction.x << " Y: " << direction.y << std::endl;
-				std::cout << "Head X: " << headCenter_x << " Y: " << headCenter_y << std::endl;
-				std::cout << "Nose X: " << noseTip_x << " Y: " << noseTip_y << std::endl;
-				std::cout << "Pose X: " << pose_x << " Y: " << pose_y << std::endl;
-			}
-			*/
-
-			// TESTING
-			// Look into PoseQuaternion
-
-			//int endPoseX = noseTip_x - (1.5 * direction.x);
-			//int endPoseY = noseTip_y - (1.5 * direction.y);
 
 			int endPoseX = int(pose_x - (1.5 * (double)direction.x));
 			int endPoseY = int(pose_y - (1.5 * (double)direction.y));
 
-			//MoveToEx(dc2, noseTip_x, noseTip_y, 0);
-			//LineTo(dc2, noseTip_x + 1.2 * direction.x, noseTip_y + 1.2 * direction.y);
 			MoveToEx(dc2, headCenter_x, headCenter_y, 0);
 			LineTo(dc2, endPoseX, endPoseY);
 

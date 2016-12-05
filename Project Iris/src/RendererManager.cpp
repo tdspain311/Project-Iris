@@ -1,13 +1,7 @@
 #include "RendererManager.h"
 
 extern HANDLE g_hMutex;
-/*
-FaceTrackingRendererManager::FaceTrackingRendererManager(FaceTrackingRenderer2D* renderer2D, FaceTrackingRenderer3D* renderer3D) :
-	m_renderer2D(renderer2D), m_renderer3D(renderer3D), m_currentRenderer(NULL)
-{
-	m_rendererSignal = CreateEvent(NULL, FALSE, FALSE, NULL);
-}
-*/
+
 RendererManager::RendererManager(Graphics* renderer3D) :
 	m_renderer3D(renderer3D), m_currentRenderer(NULL)
 {
@@ -17,10 +11,7 @@ RendererManager::RendererManager(Graphics* renderer3D) :
 RendererManager::~RendererManager(void)
 {
 	CloseHandle(m_rendererSignal);
-	/*
-	if(m_renderer2D != NULL)
-		delete m_renderer2D;
-	*/
+
 	if(m_renderer3D != NULL)
 		delete m_renderer3D;
 }
@@ -31,16 +22,7 @@ void RendererManager::SetRendererType(Renderer::RendererType type)
 	dwWaitResult = WaitForSingleObject(g_hMutex,	INFINITE);
 	if(dwWaitResult == WAIT_OBJECT_0)
 	{
-		/*
-		if(type == FaceTrackingRenderer::R2D)
-		{
-			m_currentRenderer = m_renderer2D;
-		}
-		else
-		{
-			m_currentRenderer = m_renderer3D;
-		}
-		*/
+
 		m_currentRenderer = m_renderer3D;
 
 		if(!ReleaseMutex(g_hMutex))
@@ -62,13 +44,11 @@ void RendererManager::Render()
 
 void RendererManager::SetSenseManager(PXCSenseManager* senseManager)
 {
-	//m_renderer2D->SetSenseManager(senseManager);
 	m_renderer3D->SetSenseManager(senseManager);
 }
 
 void RendererManager::SetNumberOfLandmarks(int numLandmarks)
 {
-	//m_renderer2D->SetNumberOfLandmarks(numLandmarks);
 	m_renderer3D->SetNumberOfLandmarks(numLandmarks);
 }
 
@@ -84,7 +64,6 @@ void RendererManager::DrawBitmap(PXCCapture::Sample* sample)
 
 void RendererManager::SetOutput(PXCFaceData* output)
 {
-	//m_renderer2D->SetOutput(output);
 	m_renderer3D->SetOutput(output);
 }
 

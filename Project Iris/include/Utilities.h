@@ -13,14 +13,8 @@ extern std::map<int, PXCCapture::DeviceInfo> g_deviceInfoMap;
 class Utilities
 {
 public:
-	static int GetChecked(HMENU menu);
-	static pxcCHAR* GetCheckedDevice(HWND dialogWindow);
-	static PXCCapture::DeviceInfo* GetCheckedDeviceInfo(HWND dialogWindow);
-	static pxcCHAR* GetCheckedModule(HWND dialogWindow);
 	static void SetStatus(HWND dialogWindow, pxcCHAR *line, StatusWindowPart part);
-	static bool IsModuleSelected(HWND hwndDlg, const int moduleID);
 	static bool GetPlaybackState(HWND DialogWindow);
-	static PXCFaceConfiguration::TrackingModeType GetCheckedProfile(HWND dialogWindow);
 	static const int TextHeight = 16;
 };
 
