@@ -32,6 +32,7 @@ HANDLE g_hMutex = NULL;
 HWND g_hWnd = NULL;
 HWND g_hWndEyeBack = NULL;
 HWND g_hWndEyePoint = NULL;
+HWND g_hWndCalibPoint = NULL;
 HINSTANCE g_hInstance = NULL;
 
 volatile bool isRunning = false;
@@ -40,7 +41,7 @@ volatile bool isPaused = false;
 volatile bool isActiveApp = true;
 volatile bool isLoadCalibFile = false;
 
-static int controls[] = { ID_START, ID_STOP, ID_LOAD_CALIB, ID_NEW_CALIB, IDC_STATIC2, IDC_LIST1 };
+static int controls[] = { ID_START, ID_STOP, ID_LOAD_CALIB, ID_NEW_CALIB };
 static RECT layout[3 + sizeof(controls) / sizeof(controls[0])];
 
 volatile int eye_point_x = 2000;
@@ -84,7 +85,7 @@ bool make_transparent(HWND hWnd_) {
 	SetWindowLong(hWnd_, GWL_EXSTYLE , GetWindowLong(hWnd_, GWL_EXSTYLE) | WS_EX_LAYERED);
 	if (GetLastError()) return FALSE;
 
-	return set_layered_window(hWnd_, RGB(0,0,0), 127, LWA_COLORKEY|LWA_ALPHA) != NULL;
+	return set_layered_window(hWnd_, TRANSPARENT, 0, LWA_COLORKEY) != NULL;
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd_, UINT message_, WPARAM wParam_, LPARAM lParam_) {
@@ -100,6 +101,23 @@ LRESULT CALLBACK WndProc(HWND hWnd_, UINT message_, WPARAM wParam_, LPARAM lPara
 				CloseWindow(hWnd_);
 				break;
 		}
+
+	case WM_PAINT:
+		if (hWnd_ == g_hWndEyePoint) {
+
+			HDC dc = GetDC(g_hWndEyePoint);
+			HBRUSH hbrush = CreateSolidBrush(RGB(0, 255, 0));
+			HPEN hPen = CreatePen(PS_SOLID, 3, RGB(0, 255, 0));
+
+			SelectObject(dc, hPen);
+			SelectObject(dc, hbrush);
+			Ellipse(dc, 5, 5, 25, 25);
+
+			DeleteObject(hPen);
+			DeleteObject(hbrush);
+			ReleaseDC(g_hWndEyePoint, dc);
+		}
+		break;
 	}
 
 	// default message handling
@@ -159,8 +177,8 @@ bool InitTransWindow(HWND* hwnd_, int size_, DWORD color_, WCHAR* name_) {
 	// create transparent eye point window
 	if (*hwnd_ == NULL) {
 
-		MyRegisterClass(g_hInstance, color_, name_);
-
+		MyRegisterClass(g_hInstance, TRANSPARENT, name_);
+	
 		*hwnd_ = CreateWindow(name_, name_, WS_POPUP,
 			-500, -500, size_, size_, g_hWndEyeBack, NULL, g_hInstance, NULL);
 
@@ -220,7 +238,7 @@ void CloseCalibWindows() {
 
 	// close calibration windows
 	CloseTransWindow(&g_hWndEyeBack);
-	CloseTransWindow(&g_hWndEyePoint);
+	CloseTransWindow(&g_hWndCalibPoint);
 
 }
 
@@ -248,7 +266,7 @@ void InitCalibWindows(CalibMode mode_) {
 
 	case mode_calib:
 		InitBackWindow(&g_hWndEyeBack, RGB(240, 240, 240), L"Background");
-		InitSimpleWindow(&g_hWndEyePoint, 35, RGB(0, 0, 255), L"GPI Calibrate");  // 35-50
+		InitSimpleWindow(&g_hWndCalibPoint, 35, RGB(255, 0, 0), L"GPI Calibrate");  // 35-50
 		break;
 
 	case mode_live:
@@ -268,25 +286,28 @@ void InitCalibWindows(CalibMode mode_) {
 void UpdateTracking() {
 
 	// set position of gaze point
-	if (g_hWndEyePoint) {
-
-		RECT rc;
-		GetWindowRect(g_hWndEyePoint, &rc);
-
-		int width = rc.right - rc.left;
-		int height = rc.bottom - rc.top;
+	if (g_hWndEyePoint || g_hWndCalibPoint) {
 
 		if (modeWork == mode_calib) {
+			RECT rc;
+			GetWindowRect(g_hWndCalibPoint, &rc);
 
-			SetWindowPos(g_hWndEyePoint, NULL, eye_point_x - width / 2, eye_point_y - height / 2, width, height, NULL);
+			int width = rc.right - rc.left;
+			int height = rc.bottom - rc.top;
+			SetWindowPos(g_hWndCalibPoint, NULL, eye_point_x - width / 2, eye_point_y - height / 2, width, height, NULL);
 
 		}
 		else
 		{
 			// Gaze position
+			RECT rc;
 			RECT wrc;
 			HWND hDesktop = GetDesktopWindow();
 			GetWindowRect(hDesktop, &wrc);
+			GetWindowRect(g_hWndEyePoint, &rc);
+
+			int width = rc.right - rc.left;
+			int height = rc.bottom - rc.top;
 
 			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 				
@@ -326,7 +347,7 @@ void UpdateTracking() {
 			}
 			if (GetMenuState(GetSubMenu(GetMenu(g_hWnd), 1), ID_ALWAYSON_MOUSE, MF_BYCOMMAND) & MF_CHECKED)
 				SetCursorPos(gaze_point_x, gaze_point_y);
-			else if (GetMenuState(GetSubMenu(GetMenu(g_hWnd), 1), ID_ALWAYSON_GPI, MF_BYCOMMAND) & MF_CHECKED)
+			else if (GetMenuState(GetSubMenu(GetMenu(g_hWnd), 1), ID_ALWAYSON_GPI, MF_BYCOMMAND) & MF_CHECKED) 
 				SetWindowPos(g_hWndEyePoint, NULL, gaze_point_x, gaze_point_y, width, height, NULL);
 		}
 	}
@@ -721,6 +742,9 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 	switch (message_) {
 
 		case WM_INITDIALOG:
+	
+			SaveLayout(dialogWindow_);
+			// TODO: Autoload "default_user" calib config
 
 			return TRUE; 
 
@@ -929,7 +953,7 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 				case ID_ALWAYSON_GPI:
 					
 					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_GPI, MF_CHECKED);
-					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_MOUSE, MF_UNCHECKED);
+					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_MOUSE, MF_UNCHECKED); 
 					
 					break;
 				
