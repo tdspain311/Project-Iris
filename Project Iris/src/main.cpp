@@ -105,6 +105,7 @@ LRESULT CALLBACK WndProc(HWND hWnd_, UINT message_, WPARAM wParam_, LPARAM lPara
 	case WM_PAINT:
 		if (hWnd_ == g_hWndEyePoint) {
 
+			// Draw GPI
 			HDC dc = GetDC(g_hWndEyePoint);
 			HBRUSH hbrush = CreateSolidBrush(RGB(0, 255, 0));
 			HPEN hPen = CreatePen(PS_SOLID, 3, RGB(0, 255, 0));
@@ -116,6 +117,7 @@ LRESULT CALLBACK WndProc(HWND hWnd_, UINT message_, WPARAM wParam_, LPARAM lPara
 			DeleteObject(hPen);
 			DeleteObject(hbrush);
 			ReleaseDC(g_hWndEyePoint, dc);
+
 		}
 		break;
 	}
@@ -345,8 +347,9 @@ void UpdateTracking() {
 				SetConsoleTextAttribute(hConsole, 4);
 				std::cout << "Gaze Position (x, y): " << eye_point_x << ", " << eye_point_y << " || Angle (horizontal, vertical): " << eye_horizontal_angle << ", " << eye_vertical_angle << std::endl;
 			}
-			if (GetMenuState(GetSubMenu(GetMenu(g_hWnd), 1), ID_ALWAYSON_MOUSE, MF_BYCOMMAND) & MF_CHECKED)
+			if (GetMenuState(GetSubMenu(GetMenu(g_hWnd), 1), ID_ALWAYSON_CURSOR, MF_BYCOMMAND) & MF_CHECKED) {
 				SetCursorPos(gaze_point_x, gaze_point_y);
+			}
 			else if (GetMenuState(GetSubMenu(GetMenu(g_hWnd), 1), ID_ALWAYSON_GPI, MF_BYCOMMAND) & MF_CHECKED) 
 				SetWindowPos(g_hWndEyePoint, NULL, gaze_point_x, gaze_point_y, width, height, NULL);
 		}
@@ -953,20 +956,22 @@ INT_PTR CALLBACK MessageLoopThread(HWND dialogWindow_, UINT message_, WPARAM wPa
 				case ID_ALWAYSON_GPI:
 					
 					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_GPI, MF_CHECKED);
-					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_MOUSE, MF_UNCHECKED); 
+					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_CURSOR, MF_UNCHECKED); 
 					
 					break;
 				
-				case ID_ALWAYSON_MOUSE:
+				case ID_ALWAYSON_CURSOR:
 					
-					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_MOUSE, MF_CHECKED);
+					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_CURSOR, MF_CHECKED);
 					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_GPI, MF_UNCHECKED);
+					if (g_hWndEyePoint)
+						CloseTransWindow(&g_hWndEyePoint);
 					
 					break;
 				
 				case ID_HOTKEY_ASSIGNED:
 					
-					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_MOUSE, MF_UNCHECKED);
+					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_CURSOR, MF_UNCHECKED);
 					CheckMenuItem(GetSubMenu(menu1, 1), ID_ALWAYSON_GPI, MF_UNCHECKED);
 					CheckMenuItem(GetSubMenu(menu1, 1), ID_HOTKEY_ASSIGNED, MF_CHECKED);
 					
