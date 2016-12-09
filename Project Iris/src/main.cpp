@@ -528,7 +528,7 @@ void RedoLayout(HWND dialogWindow_) {
 		rectangle.bottom - (layout[1].top - layout[0].top) - (layout[0].bottom - layout[1].bottom),
 		SWP_NOZORDER);
 
-	/* Buttons & CheckBoxes */
+	/* Buttons */
 	
 	for (int i = 0; i < sizeof(controls) / sizeof(controls[0]); ++i) {
 
